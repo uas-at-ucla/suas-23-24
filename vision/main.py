@@ -71,6 +71,7 @@ def queue_image_for_odlc():
         # Try to read from shared memory object
         with open(f"/dev/shm/{img_name}", "r+b") as f:
             # Access file and its data from shared memory using a memory map
+            print(f"/dev/shm/{img_name}")
             mapped_file = mmap.mmap(f.fileno(), 0)
             data = mapped_file.read()
 

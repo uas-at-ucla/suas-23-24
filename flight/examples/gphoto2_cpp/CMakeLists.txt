@@ -18,7 +18,7 @@ target_include_directories(takephoto PRIVATE
 )
 
 target_link_libraries(takephoto PRIVATE
-/usr/lib/x86_64-linux-gnu/libgphoto2.so
+/usr/lib/aarch64-linux-gnu/libgphoto2.so
 rt
-/usr/lib/x86_64-linux-gnu/libcurl.so
+/usr/lib/aarch64-linux-gnu/libcurl.so.4
 )
