@@ -11,10 +11,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker containers
+      working-directory: ./vision
       run: make build
     - name: Start Docker container
+      working-directory: ./vision
       run: make run
     - name: Run unit tests
-      run: docker exec suas-onboard-vision-web-1 python3 -m unittest
+      working-directory: ./vision
+      run: docker exec vision-web-1 python3 -m unittest
     - name: Stop containers
-      run: docker compose kill
+      working-directory: ./vision
+      run: make kill
