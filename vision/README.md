@@ -20,3 +20,7 @@ make run
 The server will now be serving requests at localhost:8003. To test your
 installation, go to [localhost:8003](http://localhost:8003) in your browser.
 If you see "Hello World!" then your installation is working!
+
+## Development Tips:
++ Remember to add any downloaded libraries to `requirements.txt`.
++ You can create environment variables by adding them in the `docker-compose.yml` file, under `services: web: environment:`.
