@@ -7,7 +7,7 @@ Then, clone this repo locally:
 
 ```
 git clone https://github.com/uas-at-ucla/uas-2024
-cd suas-onboard/vision
+cd uas-2024/vision
 ```
 
 Note: If you get an issue saying that password authentication was removed, visit [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
