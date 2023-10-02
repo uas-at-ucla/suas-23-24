@@ -43,7 +43,7 @@ Instructions for OSX can be found on the Ardupilot documentation [here](https://
 Instructions for Windows users can be found on the Ardupilot documentation [here](https://ardupilot.org/dev/docs/building-setup-windows.html#building-setup-windows).
 
 ## Gazebo (optional)
-Navigate to this folder in your command window, then run `bash setup/gazebo_install.sh.sh`.
+Navigate to this folder in your command window, then run `bash setup/gazebo_install.sh`.
 Note: For windows users, run this command inside wsl.
 
 
