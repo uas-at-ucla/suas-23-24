@@ -1,8 +1,7 @@
 # uas-2024/vision
 
 ## Getting Started
-First, ensure you have Docker installed. See the instructions
-[here](https://docs.docker.com/get-docker/) for your setup.
+First, ensure you have [Git](https://git-scm.com/downloads) and [Docker](https://docs.docker.com/get-docker/) installed.
 
 Then, clone this repo locally:
 
