@@ -52,7 +52,8 @@ if not connection_string:
 
 # Connect to the Vehicle
 print("Connecting to vehicle on: %s" % connection_string)
-vehicle = connect(connection_string, wait_ready=True, baud=57600)
+vehicle = connect(connection_string, wait_ready=False, baud=57600)
+vehicle.wait_ready(True, timeout=60)
 
 
 def get_location_metres(original_location, dNorth, dEast):

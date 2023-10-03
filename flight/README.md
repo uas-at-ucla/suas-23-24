@@ -1,49 +1,53 @@
+
 # uas-2024/flight
-Instructions and scripts for installing 'stuff' for SUAS flight
-
-## Python3.9
 ---
-Note: If you already have a  newer version of python installed, see [pyenv](https://github.com/pyenv/pyenv).
-### **Install python3.9 on Linux (Ubuntu)**
-Run the following script in terminal
+## Prerequisites
++ If you are on a Windows system, we recommend you to install [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install). You will be doing all your work inside the WSL terminal for this point on.
+    + If you are on Windows 10 (not 11), then see https://github.com/uas-at-ucla/SUAS-Installs/tree/main#vcxsrv.
++ Ensure you have Python, [Git](https://git-scm.com/downloads), and [Docker](https://docs.docker.com/get-docker/) installed.
++ Install the python requirements by navigating to this folder and running `pip3 install -r requirements.txt`.
++ Clone the repository by running `git clone https://github.com/uas-at-ucla/uas-2024` in your terminal.
+
+## Dronekit
+Dronekit is the python library we will use to send commands to the drone. To install run:
 ```bash
-sudo apt install python3
-```
-### **Install python3.9 on Windows**
-Go to https://www.python.org/downloads/, then download and install python 3.9.13. 
-
-i.e. 
-1. Look for python 3.9.13
-2. click download
-3. choose the installer that matches your machine specs
-4. download it
-5. run installation
-6. complete installation.
-### **Install python3.9 on MacOS**
-Install homebrew (the package manager, not a coffee preparation heuristic) by running the following script in your terminal
-``` bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+git clone https://github.com/dronekit/dronekit-python
+cd dronekit-python
+sudo python setup.py install
 ```
 
-Then, restart your terminal and run the following script
-``` bash
-brew install python3
-brew install pyenv
-pyenv install 3.9.13
-```
 ## ArduPlane
----
-#### **Linux**
-Navigate to this folder in your command window, then run `bash setup/ubuntu_ardupilot_install.sh`.
-#### **MAC**
-**[WIP]**
-Instructions for OSX can be found on the Ardupilot documentation [here](https://ardupilot.org/dev/docs/building-setup-mac.html#building-setup-mac).
-### **Windows**
-**[WIP]**
-Instructions for Windows users can be found on the Ardupilot documentation [here](https://ardupilot.org/dev/docs/building-setup-windows.html#building-setup-windows).
+In your terminal, navigate to the `/flight` directory and run:
+```bash
+git clone --recurse-submodules https://github.com/ArduPilot/ardupilot.git
+```
+Then navigate to the `ardupilot` directory and replace the `Dockerfile` with the one [here](https://gist.github.com/nathanchan631/b11d6706369ad092583bde1704ac10fb).
 
 ## Gazebo (optional)
-Navigate to this folder in your command window, then run `bash setup/gazebo_install.sh`.
-Note: For windows users, run this command inside wsl.
++ For Linux/WSL systems, we have provided a script for you [here](https://github.com/uas-at-ucla/SUAS-Installs/blob/main/gazebo_install.sh), which you should put in the `/flight` directory and run using `bash gazebo_install.sh`.
++ For macOS, a script is in progress. For now, see the [Gazebo Docs](https://gazebosim.org/docs/all/getstarted) for installation instructions. You will also have to install the [Gazebo Plugin for Ardupilot](https://github.com/ArduPilot/ardupilot_gazebo).
 
+### Building and Running the SITL (Simulation in The Loop)
+##### With Gazebo:
 
+Start Ardupilot with:
+```bash
+bash run_sim.sh
+```
+You can then start the simulation with:
+```bash
+gz sim -v4 -r iris_runway.sdf
+```
+
+##### Without Gazebo:
+Start Ardupilot with:
+```bash
+bash run_sim.sh -gz false
+```
+
+### Test Installation
+In a terminal window separate from where the simulation is running, navigate to this directory and run:
+```bash
+python mission_basic.py --connect=tcp:127.0.0.1:5762
+```
+After taking a minute to connect, the drone should fly around on the map and information should be printed to the console. If you are running Gazebo, the drone should move around there as well.
