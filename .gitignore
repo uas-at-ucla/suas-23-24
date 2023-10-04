@@ -2,5 +2,3 @@
 */__pycache__/*
 .vscode/*
 *.pyc
-ardupilot/
-gz_ws/
