@@ -1,53 +1,32 @@
 
 # uas-2024/flight
 ---
-## Prerequisites
-+ If you are on a Windows system, we recommend you to install [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install). You will be doing all your work inside the WSL terminal for this point on.
-    + If you are on Windows 10 (not 11), then see https://github.com/uas-at-ucla/SUAS-Installs/tree/main#vcxsrv.
-+ Ensure you have Python, [Git](https://git-scm.com/downloads), and [Docker](https://docs.docker.com/get-docker/) installed.
+### Prerequisites
++ If you are on a Windows system, you will have to either (1) dual-boot Linux!!!! or (2) install [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install).
++ Ensure you have Python and [Git](https://git-scm.com/downloads) installed.
 + Install the python requirements by navigating to this folder and running `pip3 install -r requirements.txt`.
 + Clone the repository by running `git clone https://github.com/uas-at-ucla/uas-2024` in your terminal.
 
-## Dronekit
-Dronekit is the python library we will use to send commands to the drone. To install run:
-```bash
-git clone https://github.com/dronekit/dronekit-python
-cd dronekit-python
-sudo python setup.py install
-```
+### PX4 Autopilot
+PX4 is the autopilot controller for the drone. Below are the installation links for each OS:
++ [Mac](https://docs.px4.io/main/en/dev_setup/dev_env_mac.html)
++ [Windows](https://docs.px4.io/main/en/dev_setup/dev_env_windows_wsl.html) (Skip the "Flashing" section at the bottom)
++ [Linux](https://docs.px4.io/main/en/dev_setup/building_px4.html) (Only the "Simulation and NuttX (Pixhawk) Targets" section)
 
-## ArduPlane
-In your terminal, navigate to the `/flight` directory and run:
-```bash
-git clone --recurse-submodules https://github.com/ArduPilot/ardupilot.git
-```
-Then navigate to the `ardupilot` directory and replace the `Dockerfile` with the one [here](https://gist.github.com/nathanchan631/b11d6706369ad092583bde1704ac10fb).
+### QGroundControl
+QGroundControl is our Ground Control Station (GCS). You can install it [here](https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.html).
+Note that Windows users should have installed this in the previous step.
 
-## Gazebo (optional)
-+ For Linux/WSL systems, we have provided a script for you [here](https://github.com/uas-at-ucla/SUAS-Installs/blob/main/gazebo_install.sh), which you should put in the `/flight` directory and run using `bash gazebo_install.sh`.
-+ For macOS, a script is in progress. For now, see the [Gazebo Docs](https://gazebosim.org/docs/all/getstarted) for installation instructions. You will also have to install the [Gazebo Plugin for Ardupilot](https://github.com/ArduPilot/ardupilot_gazebo).
-
-### Building and Running the SITL (Simulation in The Loop)
-##### With Gazebo:
-
-Start Ardupilot with:
+### MAVSDK
+MAVSDK is the Python library used to communicate with the autopilot system. Install it with:
 ```bash
-bash run_sim.sh
-```
-You can then start the simulation with:
-```bash
-gz sim -v4 -r iris_runway.sdf
-```
-
-##### Without Gazebo:
-Start Ardupilot with:
-```bash
-bash run_sim.sh -gz false
+pip3 install mavsdk
 ```
 
 ### Test Installation
-In a terminal window separate from where the simulation is running, navigate to this directory and run:
-```bash
-python mission_basic.py --connect=tcp:127.0.0.1:5762
-```
-After taking a minute to connect, the drone should fly around on the map and information should be printed to the console. If you are running Gazebo, the drone should move around there as well.
+First, start QGroundControl. Then navigate to the `PX4-Autopilot` directory, and run one of the following commands based on which simulation environment you want to use:
++ Gazebo: `make px4_sitl gz_x500`
++ Gazebo Classic: `make px4_sitl gazebo-classic`
++ jMAVSim (Use this one if none of the above worked): `make px4_sitl jmavsim`
+
+You should see a simulation window appear, as well as the drone appear in QGroundControl. Then, navigate to this directory (`/flight`) and run `python example_mission.py`. The drone should move around both in the simulation window and in QGroundControl.
