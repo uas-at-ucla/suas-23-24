@@ -2,7 +2,7 @@
 # uas-2024/flight
 ---
 ### Prerequisites
-+ If you are on a Windows system, you will have to either (1) dual-boot Linux!!!! or (2) install [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install).
++ If you are on a Windows system, you will have to either (1) *dual-boot Linux!!!!* or (2) install [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install).
 + Ensure you have Python and [Git](https://git-scm.com/downloads) installed.
 + Install the python requirements by navigating to this folder and running `pip3 install -r requirements.txt`.
 + Clone the repository by running `git clone https://github.com/uas-at-ucla/uas-2024` in your terminal.
@@ -29,4 +29,9 @@ First, start QGroundControl. Then navigate to the `PX4-Autopilot` directory, and
 + Gazebo Classic: `make px4_sitl gazebo-classic`
 + jMAVSim (Use this one if none of the above worked): `make px4_sitl jmavsim`
 
-You should see a simulation window appear, as well as the drone appear in QGroundControl. Then, navigate to this directory (`/flight`) and run `python example_mission.py`. The drone should move around both in the simulation window and in QGroundControl.
+You should see a simulation window appear, as well as the drone appear in QGroundControl.
+Then, navigate to this directory (`/flight`) and run:
+```bash
+python example_mission.py
+```
+The drone should move around in both the simulation window and QGroundControl.
