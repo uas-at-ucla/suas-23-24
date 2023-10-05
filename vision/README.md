@@ -19,7 +19,7 @@ make run
 ```
 The server will now be serving requests at localhost:8003. To test your
 installation, go to [localhost:8003](http://localhost:8003) in your browser.
-If you see "Hello World!" then your installation is working!
+If you see a page with graphs displayed, then your installation is working!
 
 To run unittests:
 ```
