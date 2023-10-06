@@ -4,7 +4,7 @@ pipeline {
 	stages {
 		stage('Build') {
 			steps {
-				dir("/vision") {
+				dir("./vision/") {
 					sh "make build"
 				}
 			}
@@ -13,7 +13,7 @@ pipeline {
 		stage('Test') {
 			steps {
 				sh "flake8 ./ --output-file=flake8.log --exit-zero"
-				dir("/vision") {
+				dir("./vision/") {
 					sh 'make coverage'
 				}
 			}
