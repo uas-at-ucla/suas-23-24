@@ -16,3 +16,8 @@ kill:
 test:
 	docker compose build && docker compose up -d && \
 		docker exec vision-web-1 python3 -m unittest
+		
+coverage:
+	docker compose build && docker compose up -d && \
+		docker exec vision-web-1 bash -c \
+		"coverage run -m unittest; coverage xml -i"
