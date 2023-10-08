@@ -3,3 +3,4 @@ gunicorn==21.2.0
 opencv-python==4.8.1.78
 numpy==1.26.0
 redis==5.0.1
+coverage==7.3.2

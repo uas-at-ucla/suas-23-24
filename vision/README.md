@@ -12,7 +12,7 @@ cd uas-2024/vision
 
 Note: If you get an issue saying that password authentication was removed, visit [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-Build and run the Docker image:
+Build and run the Docker image (in the uas-2024 folder):
 ```
 make build
 make run
