@@ -7,12 +7,12 @@ Then, clone this repo locally:
 
 ```
 git clone https://github.com/uas-at-ucla/uas-2024
-cd uas-2024/vision
+cd uas-2024
 ```
 
 Note: If you get an issue saying that password authentication was removed, visit [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-Build and run the Docker image (in the uas-2024 folder):
+Build and run the Docker image:
 ```
 make build
 make run
