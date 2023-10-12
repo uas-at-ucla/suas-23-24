@@ -1,49 +1,37 @@
+
 # uas-2024/flight
-Instructions and scripts for installing 'stuff' for SUAS flight
-
-## Python3.9
 ---
-Note: If you already have a  newer version of python installed, see [pyenv](https://github.com/pyenv/pyenv).
-### **Install python3.9 on Linux (Ubuntu)**
-Run the following script in terminal
+### Prerequisites
++ If you are on a Windows system, you will have to either (1) *dual-boot Linux!!!!* or (2) install [Windows Subsystem for Linux (WSL)](https://learn.microsoft.com/en-us/windows/wsl/install).
++ Ensure you have Python and [Git](https://git-scm.com/downloads) installed.
++ Install the python requirements by navigating to this folder and running `pip3 install -r requirements.txt`.
++ Clone the repository by running `git clone https://github.com/uas-at-ucla/uas-2024` in your terminal.
+
+### PX4 Autopilot
+PX4 is the autopilot controller for the drone. Below are the installation links for each OS:
++ [Mac](https://docs.px4.io/main/en/dev_setup/dev_env_mac.html)
++ [Windows](https://docs.px4.io/main/en/dev_setup/dev_env_windows_wsl.html) (Skip the "Flashing" section at the bottom)
++ [Linux](https://docs.px4.io/main/en/dev_setup/building_px4.html) (Only the "Simulation and NuttX (Pixhawk) Targets" section)
+
+### QGroundControl
+QGroundControl is our Ground Control Station (GCS). You can install it [here](https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.html).
+Note that Windows users should have installed this in the previous step.
+
+### MAVSDK
+MAVSDK is the Python library used to communicate with the autopilot system. Install it with:
 ```bash
-sudo apt install python3
-```
-### **Install python3.9 on Windows**
-Go to https://www.python.org/downloads/, then download and install python 3.9.13. 
-
-i.e. 
-1. Look for python 3.9.13
-2. click download
-3. choose the installer that matches your machine specs
-4. download it
-5. run installation
-6. complete installation.
-### **Install python3.9 on MacOS**
-Install homebrew (the package manager, not a coffee preparation heuristic) by running the following script in your terminal
-``` bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+pip3 install mavsdk
 ```
 
-Then, restart your terminal and run the following script
-``` bash
-brew install python3
-brew install pyenv
-pyenv install 3.9.13
+### Test Installation
+First, start QGroundControl. Then navigate to the `PX4-Autopilot` directory, and run one of the following commands based on which simulation environment you want to use:
++ Gazebo: `make px4_sitl gz_x500`
++ Gazebo Classic: `make px4_sitl gazebo-classic`
++ jMAVSim (Use this one if none of the above worked): `make px4_sitl jmavsim`
+
+You should see a simulation window appear, as well as the drone appear in QGroundControl.
+Then, navigate to this directory (`/flight`) and run:
+```bash
+python example_mission.py
 ```
-## ArduPlane
----
-#### **Linux**
-Navigate to this folder in your command window, then run `bash setup/ubuntu_ardupilot_install.sh`.
-#### **MAC**
-**[WIP]**
-Instructions for OSX can be found on the Ardupilot documentation [here](https://ardupilot.org/dev/docs/building-setup-mac.html#building-setup-mac).
-### **Windows**
-**[WIP]**
-Instructions for Windows users can be found on the Ardupilot documentation [here](https://ardupilot.org/dev/docs/building-setup-windows.html#building-setup-windows).
-
-## Gazebo (optional)
-Navigate to this folder in your command window, then run `bash setup/gazebo_install.sh`.
-Note: For windows users, run this command inside wsl.
-
-
+The drone should move around in both the simulation window and QGroundControl.

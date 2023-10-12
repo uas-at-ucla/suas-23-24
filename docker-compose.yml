@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  web:
+  vision:
     build: .
     ports:
       - "8003:8003"
