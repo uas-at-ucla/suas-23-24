@@ -27,8 +27,8 @@ After following the installation steps given by the PX4 documentation:
 + Within the PX4-Autopilot folder navigate to `Tools/simulation/jmavsim/jMAVSim/lib`
 + Replace all relevant .jar files that contain the same name as the installed libraries with ones found in the `jar` folder of the unzipped files.
   
-execute `make px4-jmavsim`
-+ If you are getting a `java.lang.reflect.InovcationTargetException` try executing `make clean` then re-executing `make px4-jmavsim`
+execute `make px4_sitl jmavsim`
++ If you are getting a `java.lang.reflect.InovcationTargetException` try executing `make clean` then re-executing `make px4_sitl jmavsim`
 
 ### QGroundControl
 QGroundControl is our Ground Control Station (GCS). You can install it [here](https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.html).
