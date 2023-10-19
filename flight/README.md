@@ -10,8 +10,25 @@
 ### PX4 Autopilot
 PX4 is the autopilot controller for the drone. Below are the installation links for each OS:
 + [Mac](https://docs.px4.io/main/en/dev_setup/dev_env_mac.html)
+  + Mac users with an M1 or chip or above require extra installation steps, see **ARM 64 Processors**
+    + Follow the installation steps given in the link above specifically for the jMAVSim Simulation.
 + [Windows](https://docs.px4.io/main/en/dev_setup/dev_env_windows_wsl.html) (Skip the "Flashing" section at the bottom)
 + [Linux](https://docs.px4.io/main/en/dev_setup/building_px4.html) (Only the "Simulation and NuttX (Pixhawk) Targets" section)
+  + Linux users using computers with ARM64 processors require extra installation steps, see **ARM 64 Processors**
+    + Follow the installation steps given in the link above specifically for the jMAVSim Simulation.
+
+**ARM64 Processors** 
+
+After following the installation steps given by the PX4 documentation:
++ Install [gluegen](https://jogamp.org/chuck/job/gluegen), [jogl](https://jogamp.org/chuck/view/fwd/job/jogl), and [joal](https://jogamp.org/chuck/view/fwd/job/joal).
+  + Mac users install `macos-x86_64`
+  + Linux users install `linux-arm64`
+  + Compatible versions of these libraries are not present during the build process so a replacement is necessary.
++ Within the PX4-Autopilot folder navigate to `Tools/simulation/jmavsim/jMAVSim/lib`
++ Replace all relevant .jar files that contain the same name as the installed libraries with ones found in the `jar` folder of the unzipped files.
+  
+execute `make px4-jmavsim`
++ If you are getting a `java.lang.reflect.InovcationTargetException` try executing `make clean` then re-executing `make px4-jmavsim`
 
 ### QGroundControl
 QGroundControl is our Ground Control Station (GCS). You can install it [here](https://docs.qgroundcontrol.com/master/en/getting_started/download_and_install.html).
