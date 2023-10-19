@@ -8,7 +8,7 @@ def safe_function_call(func, default, retries, *args):
     while tries < retries:
         try:
             return func(*args)
-        except:
+        except Exception:
             traceback.print_exec()
             tries += 1
     return default
