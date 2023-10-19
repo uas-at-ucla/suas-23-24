@@ -1,0 +1,19 @@
+name: Docker Image Check
+on: [push]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker containers
+      run: make build
+    - name: Start Docker container
+      run: make run
+    - name: Run unit tests
+      run: docker exec uas-2024-vision-1 python3 -m unittest
+    - name: Stop containers
+      run: make kill
