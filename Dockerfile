@@ -7,4 +7,4 @@ RUN pip3 install -r /vision/requirements.txt
 
 COPY . /app
 WORKDIR /app
-CMD ["./vision/start_gunicorn.sh"]
+CMD ["bash","./vision/start_gunicorn.sh"]
