@@ -3,75 +3,16 @@ from ultralytics import YOLO
 import cv2
 import math
 
-model = YOLO('vision/odlc/models/best.pt')
+model = YOLO('vision/odlc/models/shape_color_checkpoint.pt')
 model.info()
 
-CLASSES = [
-    'black circle',
-    'black semicircle',
-    'black quarter circle',
-    'black triangle',
-    'black rectangle',
-    'black pentagon',
-    'black star',
-    'black cross',
-    'white circle',
-    'white semicircle',
-    'white quarter circle',
-    'white triangle',
-    'white rectangle',
-    'white pentagon',
-    'white star',
-    'white cross',
-    'red circle',
-    'red semicircle',
-    'red quarter circle',
-    'red triangle',
-    'red rectangle',
-    'red pentagon',
-    'red star',
-    'red cross',
-    'green circle',
-    'green semicircle',
-    'green quarter circle',
-    'green triangle',
-    'green rectangle',
-    'green pentagon',
-    'green star',
-    'green cross',
-    'blue circle',
-    'blue semicircle',
-    'blue quarter circle',
-    'blue triangle',
-    'blue rectangle',
-    'blue pentagon',
-    'blue star',
-    'blue cross',
-    'purple circle',
-    'purple semicircle',
-    'purple quarter circle',
-    'purple triangle',
-    'purple rectangle',
-    'purple pentagon',
-    'purple star',
-    'purple cross',
-    'orange circle',
-    'orange semicircle',
-    'orange quarter circle',
-    'orange triangle',
-    'orange rectangle',
-    'orange pentagon',
-    'orange star',
-    'orange cross',
-    'brown circle',
-    'brown semicircle',
-    'brown quarter circle',
-    'brown triangle',
-    'brown rectangle',
-    'brown pentagon',
-    'brown star',
-    'brown cross',
-]
+
+# get class names
+classes = []
+with open("vision/odlc/shape_color_classes.txt", "r") as f:
+    for class_name in f.read().splitlines():
+        classes.append(class_name)
+
 
 # define device
 if torch.cuda.is_available():
@@ -99,11 +40,11 @@ def detect_shape_color(frame_name):
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 1)
                 cv2.putText(
                     frame,
-                    (CLASSES[cls]),
+                    (classes[cls]),
                     (x1, y1),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     1,
                     (255, 0, 0),
                     1)
-                ans.append(CLASSES[cls])
+                ans.append(classes[cls])
     return ans
