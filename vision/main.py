@@ -11,12 +11,15 @@ import redis
 import traceback
 
 from flask import Flask, Response, request, jsonify, send_from_directory
+from prometheus_flask_exporter import PrometheusMetrics
 
 import odlc.detector as detector
 
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 image_queue = Queue()
+
 FILE_PATH = './images/odlc'
 
 r = redis.Redis(host='redis', port=6379, db=0)
