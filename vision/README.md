@@ -19,12 +19,13 @@ make run
 ```
 The server will now be serving requests at localhost:8003. To test your
 installation, go to [localhost:8003](http://localhost:8003) in your browser.
-If you see a page with graphs displayed, then your installation is working!
+If you see "Hello World!" then your installation is working!
 
 To run unittests:
 ```
 make test
 ```
+To see server visualization, go to [localhost:3000](http://localhost:3000) and navigate to the Vision Dashboard. Make sure to set the refresh rate.
 
 ## Development Tips:
 + Remember to add any downloaded libraries to `requirements.txt`

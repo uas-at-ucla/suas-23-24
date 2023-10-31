@@ -10,6 +10,9 @@ run:
 restart:
 	docker compose restart
 
+stop:
+	docker compose down
+
 kill:
 	docker compose kill
 	
