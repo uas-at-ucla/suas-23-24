@@ -1,5 +1,5 @@
 #!/bin/sh
 
-gunicorn main:app -w 2 -b 0.0.0.0:8003 --chdir ./vision --access-logfile -
+gunicorn main:app -w 1 -b 0.0.0.0:8003 --chdir ./vision -c ./vision/gunicorn.conf.py --access-logfile -
 
 exec "$@"

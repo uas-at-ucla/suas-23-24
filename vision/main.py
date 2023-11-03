@@ -114,6 +114,14 @@ def process_image_queue(queue):
         active_time.inc(time.time() - start_time)
 
 
+@app.route('/process', methods=['POST'])
+def simulate_process_img():
+    images_processed.inc()
+    queue_size.dec()
+    active_time.inc(2)
+    return Response(status=200)
+
+
 worker = Thread(target=process_image_queue, args=(image_queue, ))
 worker.setDaemon(True)
 worker.start()

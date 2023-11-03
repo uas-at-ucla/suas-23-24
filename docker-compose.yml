@@ -6,6 +6,13 @@ services:
       - "8003:8003"
     volumes:
       - .:/app/
+    logging:
+      driver: loki
+      options:
+        loki-url: http://172.17.0.1:3100/loki/api/v1/push
+    depends_on:
+      - loki
+
   redis:
     image: "redis:alpine"
     
@@ -17,6 +24,14 @@ services:
       - 9090:9090
     depends_on:
       - vision
+
+  loki:
+    image: grafana/loki:2.9.2
+    volumes:
+      - ./loki:/etc/loki
+    command: -config.file=/etc/loki/config.yaml
+    ports:
+      - 3100:3100
 
   grafana:
     image: grafana/grafana:10.2.0
