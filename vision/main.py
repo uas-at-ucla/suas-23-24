@@ -25,7 +25,7 @@ images_processed = Counter('vision_images_processed_total',
 queue_size = Gauge('vision_queue_size', 'Current Images Queued')
 active_time = Counter('vision_active_time_seconds', 'Active Processing Time')
 
-FILE_PATH = './images/odlc'
+IMG_FOLDER = '/app/vision/images/odlc'
 
 
 @app.route('/')
@@ -48,13 +48,26 @@ def get_best_object_detections():
 def queue_image_for_odlc():
     """
     Queue image POST request
-
-    Get image path from request and queue it.
-    TODO: Also extract telemetry data either here,
-    once it is popped from the queue, or in detector.py.
     """
-    img_path = request.get_data()
-    image_queue.put({"img_path": img_path})
+
+    # Push updates to image queue
+    # If any info is missing, throw an error
+    try:
+        req = request.json
+        assert 'img_name' in req, "field 'img_name' is missing"
+        assert 'altitude' in req, "field 'altitude' is missing"
+        assert 'latitude' in req, "field 'latitude' is missing"
+        assert 'longitude' in req, "field 'longitude' is missing"
+        assert 'heading' in req, "field 'heading' is missing"
+
+        img_path = f"{IMG_FOLDER}/{req.pop('img_name')}"
+        image_queue.put({"img_path": img_path,
+                         "telemetry": req})
+
+    except Exception as exc:
+        print(repr(exc))
+        return 'Badly formed image update', 400
+
     queue_size.inc()
     return Response(status=200)
 
@@ -96,12 +109,13 @@ def process_image_queue(queue):
     while True:
         task = queue.get()
         img_path = task['img_path']
+        telemetry = task['telemetry']
         print('Processing queued image')
         start_time = time.time()
 
         # Process image
         try:
-            detector.process_queued_image(img_path)
+            detector.process_queued_image(img_path, telemetry)
         except Exception:
             traceback.print_exc()
 
