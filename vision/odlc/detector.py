@@ -7,6 +7,7 @@ import redis
 
 
 r = redis.Redis(host='redis', port=6379, db=0)
+r.set('detector/detections', json.dumps([]))
 
 
 def update_targets(targets):
@@ -30,19 +31,18 @@ def get_top_detections():
     return []
 
 
-def process_queued_image(img):
+def process_queued_image(img_path, telemetry):
     """
     Main routine for image processing
     """
 
     detections = json.loads(r.get('detector/detections'))
 
-    # TODO: Get telemetry data from image metadata
-
     # TODO: Get emergent detectins
     # TODO: Get alphanumric detections
+    # TODO: If alphanumeric detection found, run odlc
 
-    # TODO: Add these detections to the detections variable
+    # TODO: Append these detections to the detections variable
 
     json_detections = json.dumps(detections)
     r.set('detector/detections', json_detections)
