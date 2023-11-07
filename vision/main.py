@@ -7,49 +7,57 @@ from threading import Thread
 
 import os
 import time
-import redis
 import traceback
 
-from flask import Flask, Response, request, jsonify, send_from_directory
+from flask import Flask, Response, request, jsonify
+from prometheus_flask_exporter import PrometheusMetrics
+from prometheus_client import Counter
+from prometheus_client import Gauge
 
 import odlc.detector as detector
 
-
 app = Flask(__name__)
 image_queue = Queue()
-FILE_PATH = './images/odlc'
 
-r = redis.Redis(host='redis', port=6379, db=0)
+metrics = PrometheusMetrics(app)
+images_processed = Counter('vision_images_processed_total',
+                           'Total Images Processed')
+queue_size = Gauge('vision_queue_size', 'Current Images Queued')
+active_time = Counter('vision_active_time_seconds', 'Active Processing Time')
+location_lat = Gauge('vision_location_latitude', 'Current Latitude')
+location_lon = Gauge('vision_location_longitude', 'Current Longitude')
+location_alt = Gauge('vision_location_altitude', 'Current Altitude')
+location_heading = Gauge('vision_location_heading', 'Current Heading')
+
+IMG_FOLDER = '/app/vision/images/odlc'
 
 
 @app.route('/')
-@app.route('/index')
 def index():
-    return send_from_directory('html', 'index.html')
+    return 'Hello world!\n'
 
-
-@app.route('/status', methods=['GET'])
-def get_status():
+@app.route('/post_telemetry', methods=['POST'])
+def post_telemetry():
     """
-    Get queue status
-
-    TOOO: Get processing data
+    Post telemetry data
     """
-    num_processed = int(r.get('vision/images_processed').decode('utf-8'))
+    try:
+        req = request.json
+        assert 'altitude' in req, "field 'altitude' is missing"
+        assert 'latitude' in req, "field 'latitude' is missing"
+        assert 'longitude' in req, "field 'longitude' is missing"
+        assert 'heading' in req, "field 'heading' is missing"
 
-    if num_processed > 0:
-        tpi = float(r.get('vision/active_time').
-                    decode('utf-8')) / num_processed
-    else:
-        tpi = 0.0
+        location_lat.set(req['latitude'])
+        location_lon.set(req['longitude'])
+        location_alt.set(req['altitude'])
+        location_heading.set(req['heading'])
 
-    status = {
-        'processed_images': num_processed,
-        'queued_images': image_queue.qsize(),
-        'time_per_image': tpi
-    }
+    except Exception as exc:
+        print(repr(exc))
+        return 'Badly formed telemetry update', 400
 
-    return jsonify(status)
+    return Response(status=200)
 
 
 @app.route('/odlc', methods=['GET'])
@@ -67,13 +75,27 @@ def get_best_object_detections():
 def queue_image_for_odlc():
     """
     Queue image POST request
-
-    Get image path from request and queue it.
-    TODO: Also extract telemetry data either here,
-    once it is popped from the queue, or in detector.py.
     """
-    img_path = request.get_data()
-    image_queue.put({"img_path": img_path})
+
+    # Push updates to image queue
+    # If any info is missing, throw an error
+    try:
+        req = request.json
+        assert 'img_name' in req, "field 'img_name' is missing"
+        assert 'altitude' in req, "field 'altitude' is missing"
+        assert 'latitude' in req, "field 'latitude' is missing"
+        assert 'longitude' in req, "field 'longitude' is missing"
+        assert 'heading' in req, "field 'heading' is missing"
+
+        img_path = f"{IMG_FOLDER}/{req.pop('img_name')}"
+        image_queue.put({"img_path": img_path,
+                         "telemetry": req})
+
+    except Exception as exc:
+        print(repr(exc))
+        return 'Badly formed image update', 400
+
+    queue_size.inc()
     return Response(status=200)
 
 
@@ -88,7 +110,6 @@ def update_targets():
     try:
         data_list = request.get_json()
 
-        # Validate data, this will throw an error if anything is off
         for data in data_list:
             if data['type'] == 'emergent':
                 assert len(data.keys()) == 1
@@ -108,7 +129,6 @@ def update_targets():
         print(repr(exc))
         return 'Badly formed target update', 400
 
-    # Return empty response for success (check status code for semantics)
     return Response(status=200)
 
 
@@ -116,26 +136,36 @@ def process_image_queue(queue):
     while True:
         task = queue.get()
         img_path = task['img_path']
+        telemetry = task['telemetry']
         print('Processing queued image')
         start_time = time.time()
 
-        # Process image
-        try:
-            detector.process_queued_image(img_path)
-        except Exception:
-            traceback.print_exc()
+        # # Process image
+        # try:
+        #     detector.process_queued_image(img_path, telemetry)
+        # except Exception:
+        #     traceback.print_exc()
 
-        # Delete file and return
-        os.remove(img_path)
+        # # Delete file and return
+        # os.remove(img_path)
+
+        # wait for 4 seconds
+        time.sleep(4)
         queue.task_done()
         print('Queued image processed')
-        r.incr('vision/images_processed')
-        r.incrbyfloat('vision/active_time', time.time() - start_time)
+        images_processed.inc()
+        queue_size.dec()
+        active_time.inc(time.time() - start_time)
+
+
+@app.route('/process', methods=['POST'])
+def simulate_process_img():
+    images_processed.inc()
+    queue_size.dec()
+    active_time.inc(2)
+    return Response(status=200)
 
 
 worker = Thread(target=process_image_queue, args=(image_queue, ))
 worker.setDaemon(True)
 worker.start()
-
-r.set('vision/images_processed', 0)
-r.set('vision/active_time', 0.0)
