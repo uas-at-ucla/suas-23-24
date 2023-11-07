@@ -14,3 +14,7 @@ scrape_configs:
   - job_name: "vision"
     static_configs:
       - targets: ["vision:8003"]
+
+  - job_name: "flight"
+    static_configs:
+      - targets: ["flight:8004"]

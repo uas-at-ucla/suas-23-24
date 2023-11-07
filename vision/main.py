@@ -24,6 +24,10 @@ images_processed = Counter('vision_images_processed_total',
                            'Total Images Processed')
 queue_size = Gauge('vision_queue_size', 'Current Images Queued')
 active_time = Counter('vision_active_time_seconds', 'Active Processing Time')
+location_lat = Gauge('vision_location_latitude', 'Current Latitude')
+location_lon = Gauge('vision_location_longitude', 'Current Longitude')
+location_alt = Gauge('vision_location_altitude', 'Current Altitude')
+location_heading = Gauge('vision_location_heading', 'Current Heading')
 
 IMG_FOLDER = '/app/vision/images/odlc'
 
@@ -31,6 +35,29 @@ IMG_FOLDER = '/app/vision/images/odlc'
 @app.route('/')
 def index():
     return 'Hello world!\n'
+
+@app.route('/post_telemetry', methods=['POST'])
+def post_telemetry():
+    """
+    Post telemetry data
+    """
+    try:
+        req = request.json
+        assert 'altitude' in req, "field 'altitude' is missing"
+        assert 'latitude' in req, "field 'latitude' is missing"
+        assert 'longitude' in req, "field 'longitude' is missing"
+        assert 'heading' in req, "field 'heading' is missing"
+
+        location_lat.set(req['latitude'])
+        location_lon.set(req['longitude'])
+        location_alt.set(req['altitude'])
+        location_heading.set(req['heading'])
+
+    except Exception as exc:
+        print(repr(exc))
+        return 'Badly formed telemetry update', 400
+
+    return Response(status=200)
 
 
 @app.route('/odlc', methods=['GET'])
@@ -113,14 +140,17 @@ def process_image_queue(queue):
         print('Processing queued image')
         start_time = time.time()
 
-        # Process image
-        try:
-            detector.process_queued_image(img_path, telemetry)
-        except Exception:
-            traceback.print_exc()
+        # # Process image
+        # try:
+        #     detector.process_queued_image(img_path, telemetry)
+        # except Exception:
+        #     traceback.print_exc()
 
-        # Delete file and return
-        os.remove(img_path)
+        # # Delete file and return
+        # os.remove(img_path)
+
+        # wait for 4 seconds
+        time.sleep(4)
         queue.task_done()
         print('Queued image processed')
         images_processed.inc()
