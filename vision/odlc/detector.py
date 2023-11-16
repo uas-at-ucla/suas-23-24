@@ -4,7 +4,6 @@ Stateful representation of vision system
 
 import json
 import redis
-import pyexif as exif
 import math
 from PIL import Image
 

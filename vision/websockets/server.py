@@ -1,20 +1,22 @@
-#!/usr/bin/env python
-
 import asyncio
-
 import websockets
 
+connected = set()
 
-async def handler(websocket):
-    while True:
-        message = await websocket.recv()
-        print(message)
+async def server(websocket, path):
+    # Register.
+    connected.add(websocket)
+    try:
+        # Implement logic here.
+        async for message in websocket:
+            for conn in connected:
+                if conn != websocket:
+                    await conn.send(message)
+    finally:
+        # Unregister.
+        connected.remove(websocket)
 
+start_server = websockets.serve(server, "0.0.0.0", 8001)
 
-async def main():
-    async with websockets.serve(handler, "", 8001):
-        await asyncio.Future()  # run forever
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()

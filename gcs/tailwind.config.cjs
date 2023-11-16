@@ -26,7 +26,8 @@ const config = {
 
 					error: '#ff0000'
 				}
-			}
+			},
+			"black"
 		]
 	},
 
