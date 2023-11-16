@@ -5,7 +5,6 @@ import asyncio
 import cv2
 
 from mavsdk import System
-from mavsdk import camera
 from mavsdk.mission import MissionItem, MissionPlan
 from vision import Video
 import os
@@ -16,7 +15,6 @@ async def run():
     video = Video()
 
     os.makedirs("data/temp", exist_ok=True)
-    base_path = os.path.join("data/temp", "camera_capture")
 
     await drone.connect(system_address="udp://:14540")
 
@@ -26,10 +24,12 @@ async def run():
             print("-- Connected to drone!")
             break
 
-    print_mission_progress_task = asyncio.ensure_future(print_mission_progress(drone))
+    print_mission_progress_task = asyncio.ensure_future(
+        print_mission_progress(drone))
 
     running_tasks = [print_mission_progress_task]
-    termination_task = asyncio.ensure_future(observe_is_in_air(drone, running_tasks))
+    termination_task = asyncio.ensure_future(
+        observe_is_in_air(drone, running_tasks))
 
     mission_items = []
     mission_items.append(

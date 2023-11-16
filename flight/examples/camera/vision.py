@@ -3,9 +3,8 @@
 import cv2
 import gi
 import numpy as np
-
-gi.require_version("Gst", "1.0")
 from gi.repository import Gst
+gi.require_version("Gst", "1.0")
 
 
 class Video:
@@ -33,17 +32,28 @@ class Video:
         self.port = port
         self._frame = None
 
-        # [Software component diagram](https://www.ardusub.com/software/components.html)
+        # [Software component diagram]\
+        # (https://www.ardusub.com/software/components.html)
         # UDP video stream (:5650)
         self.video_source = "udpsrc port={}".format(self.port)
-        # [Rasp raw image](http://picamera.readthedocs.io/en/release-0.7/recipes2.html#raw-image-capture-yuv-format)
+        # [Rasp raw image]
+        # (http://picamera.readthedocs.io/en/\
+        # release-0.7/recipes2.html#raw-image-capture-yuv-format)
         # Cam -> CSI-2 -> H264 Raw (YUV 4-4-4 (12bits) I420)
         self.video_codec = (
-            "! application/x-rtp, payload=96 ! rtph264depay ! h264parse ! avdec_h264"
+            """
+            ! application/x-rtp, payload=96 ! rtph264depay ! h264parse !
+            avdec_h264
+            """
         )
-        # Python don't have nibble, convert YUV nibbles (4-4-4) to OpenCV standard BGR bytes (8-8-8)
+        # Python don't have nibble, convert YUV nibbles (4-4-4) to
+        # OpenCV standard BGR bytes (8-8-8)
         self.video_decode = (
-            "! decodebin ! videoconvert ! video/x-raw,format=(string)BGR ! videoconvert"
+
+            """
+            ! decodebin ! videoconvert ! video/x-raw,format=(string)BGR !
+            videoconvert
+            """
         )
         # Create a sink to get data
         self.video_sink_conf = (
@@ -59,9 +69,9 @@ class Video:
         """ Start gstreamer pipeline and sink
         Pipeline description list e.g:
             [
-                'videotestsrc ! decodebin', \
-                '! videoconvert ! video/x-raw,format=(string)BGR ! videoconvert',
-                '! appsink'
+                'videotestsrc ! decodebin',
+                '! videoconvert ! video/x-raw,format=(string)BGR !
+                videoconvert', '! appsink'
             ]
 
         Args:
@@ -70,8 +80,12 @@ class Video:
 
         if not config:
             config = [
+
                 "videotestsrc ! decodebin",
-                "! videoconvert ! video/x-raw,format=(string)BGR ! videoconvert",
+                """
+                ! videoconvert ! video/x-raw,format=(string)BGR ! \
+                videoconvert
+                """,
                 "! appsink",
             ]
 
@@ -117,7 +131,7 @@ class Video:
         Returns:
             bool: true if frame is available
         """
-        return type(self._frame) != type(None)
+        return not isinstance(type(self._frame), type(None))
 
     def run(self):
         """Get frame to update _frame"""

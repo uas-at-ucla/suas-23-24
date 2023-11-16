@@ -3,8 +3,6 @@ import os
 import shutil
 
 from mavsdk import System
-from mavsdk import action
-from mavsdk import telemetry
 
 OUTPUT_IMAGE_DIRECTORY = "../vision/images/odlc"
 
@@ -15,7 +13,8 @@ async def run():
     # Create image output directory
     if os.path.exists(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY)):
         shutil.rmtree(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY))
-    os.makedirs(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY),
+                exist_ok=True)
 
     # Initialize camera
 
