@@ -6,7 +6,7 @@ import cv2
 
 from mavsdk import System
 from mavsdk import camera
-from mavsdk.mission import (MissionItem, MissionPlan)
+from mavsdk.mission import MissionItem, MissionPlan
 from vision import Video
 import os
 
@@ -15,12 +15,10 @@ async def run():
     drone = System()
     video = Video()
 
-    os.makedirs('data/temp', exist_ok=True)
-    base_path = os.path.join('data/temp', 'camera_capture')
+    os.makedirs("data/temp", exist_ok=True)
+    base_path = os.path.join("data/temp", "camera_capture")
 
     await drone.connect(system_address="udp://:14540")
-
-    
 
     print("Waiting for drone to connect...")
     async for state in drone.core.connection_state():
@@ -28,33 +26,29 @@ async def run():
             print("-- Connected to drone!")
             break
 
-
-
-    print_mission_progress_task = asyncio.ensure_future(
-        print_mission_progress(drone))
-    
-
+    print_mission_progress_task = asyncio.ensure_future(print_mission_progress(drone))
 
     running_tasks = [print_mission_progress_task]
-    termination_task = asyncio.ensure_future(
-        observe_is_in_air(drone, running_tasks))
-    
+    termination_task = asyncio.ensure_future(observe_is_in_air(drone, running_tasks))
 
     mission_items = []
-    mission_items.append(MissionItem(47.398039859999997,
-                                     8.5455725400000002,
-                                     25,
-                                     10,
-                                     True,
-                                     float('nan'),
-                                     float('nan'),
-                                     MissionItem.CameraAction.NONE,
-                                     float('nan'),
-                                     float('nan'),
-                                     float('nan'),
-                                     float('nan'),
-                                     float('nan')))
-
+    mission_items.append(
+        MissionItem(
+            47.398039859999997,
+            8.5455725400000002,
+            25,
+            10,
+            True,
+            float("nan"),
+            float("nan"),
+            MissionItem.CameraAction.NONE,
+            float("nan"),
+            float("nan"),
+            float("nan"),
+            float("nan"),
+            float("nan"),
+        )
+    )
 
     mission_plan = MissionPlan(mission_items)
 
@@ -69,13 +63,11 @@ async def run():
             print("-- Global position estimate OK")
             break
 
-
     print("-- Arming")
     await drone.action.arm()
 
     print("-- Starting mission")
     await drone.mission.start_mission()
-
 
     await mission_complete(drone, 1)
 
@@ -83,30 +75,31 @@ async def run():
         continue
 
     frame = video.frame()
-    string = 'data/temp/image.jpg'
+    string = "data/temp/image.jpg"
     cv2.imwrite(string, frame)
     print("Success write image")
-    
 
     await termination_task
 
+
 async def print_mission_progress(drone):
     async for mission_progress in drone.mission.mission_progress():
-        print(f"Mission progress: "
-              f"{mission_progress.current}/"
-              f"{mission_progress.total}")
-        
+        print(
+            f"Mission progress: "
+            f"{mission_progress.current}/"
+            f"{mission_progress.total}"
+        )
+
 
 async def mission_complete(drone, task_id):
     async for mission_progress in drone.mission.mission_progress():
         if mission_progress.current == task_id:
             return
-        
 
 
 async def observe_is_in_air(drone, running_tasks):
-    """ Monitors whether the drone is flying or not and
-    returns after landing """
+    """Monitors whether the drone is flying or not and
+    returns after landing"""
 
     was_in_air = False
 
