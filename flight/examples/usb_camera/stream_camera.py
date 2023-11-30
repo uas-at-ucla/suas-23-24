@@ -3,9 +3,10 @@ import subprocess
 import time
 import signal
 
-# This example executes teh "usb_to_camera.py" file
+# This example executes the "usb_to_camera.py" file
 # and uses OpenCV to stream the newly added usb camera
-# to the screen.
+# to the screen. 
+# Only run this file by itself to have the camera running.
 
 # Optionally commented out is the option to take photos
 # from the stream once per frame (capped at 1000).
