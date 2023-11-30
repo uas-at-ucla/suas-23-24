@@ -40,6 +40,22 @@ MAVSDK is the Python library used to communicate with the autopilot system. Inst
 pip3 install mavsdk
 ```
 
+If you are using MacOS with an ARM64 Processor, a manual installation of MAVSDK-Python is required:
++ First clone the MAVSDK-Python library:
+```bash
+git clone https://github.com/mavlink/MAVSDK-Python/ --recursive
+```
++ Next, determine what version of python you have installed through:
+```bash
+python3 -V
+```
+  + For example if it returns `Python 3.11.6`, you are using Python version 3.11.
++ Finally, you must move the physical library folder into your Python library folder:
+  + Make sure you're in the directory that contains the recently cloned MAVSDK-Python folder.
+```bash
+mv MAVSDK-Python/mavsdk /opt/homebrew/lib/python[your-python-version]/site-packages
+```
+
 ### Test Installation
 First, start QGroundControl. Then navigate to the `PX4-Autopilot` directory, and run one of the following commands based on which simulation environment you want to use:
 + Gazebo: `make px4_sitl gz_x500`
@@ -47,6 +63,27 @@ First, start QGroundControl. Then navigate to the `PX4-Autopilot` directory, and
 + jMAVSim (Use this one if none of the above worked): `make px4_sitl jmavsim`
 
 You should see a simulation window appear, as well as the drone appear in QGroundControl.
+
+**MacOS Requirements**
+If you are using MacOS with an ARM64 Processor, a physical install of the MAVSDK server is required:
++ Navigate to the [MAVSDK releases](https://github.com/mavlink/MAVSDK/releases).
++ Install the file labeled, `mavsdk_server_macos`
++ Next run a command to make it an executable
+```bash
+chmod +x mavsdk_server_macos
+```
++ Before running any MAVSDK-Python missions you must do the following:
+```bash
+./mavsdk_server_macos -p 50051
+```
+ + You must also specify the port in the Python code:
+```python
+# Change this:
+drone = System()
+# To this:
+drone = System(mavsdk_server_address="localhost", port= 50051)
+```
+**Running Example Code**
 Then, navigate to this directory (`/flight`) and run:
 ```bash
 python example_mission.py

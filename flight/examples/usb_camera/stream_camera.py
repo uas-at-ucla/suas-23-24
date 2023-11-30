@@ -3,7 +3,7 @@ import subprocess
 import time
 import signal
 
-# This example executes teh "usb_to_camera.py" file 
+# This example executes teh "usb_to_camera.py" file
 # and uses OpenCV to stream the newly added usb camera
 # to the screen.
 

@@ -7,7 +7,6 @@ import cv2
 from mavsdk import System
 from mavsdk.mission import MissionItem, MissionPlan
 from vision import Video
-import os
 
 
 async def run():

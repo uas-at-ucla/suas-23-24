@@ -14,7 +14,9 @@ async def run():
     # Create image output directory
     if os.path.exists(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY)):
         shutil.rmtree(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY))
-    os.makedirs(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY), exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(),
+                OUTPUT_IMAGE_DIRECTORY),
+                exist_ok=True)
 
     # Initialize camerar
 

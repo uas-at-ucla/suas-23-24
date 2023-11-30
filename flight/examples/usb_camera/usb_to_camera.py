@@ -37,8 +37,10 @@ ffmpeg_command = [
 # Start gphoto process to capture video
 gphoto2_process = subprocess.Popen(gphoto2_command, stdout=subprocess.PIPE)
 
+
 # Start ffmpeg process to convert and stream to v4l2loopback
-ffmpeg_process = subprocess.Popen(ffmpeg_command, stdin=gphoto2_process.stdout) 
+ffmpeg_process = subprocess.Popen(ffmpeg_command, stdin=gphoto2_process.stdout)
+
 
 # When sent a SIGINT (Control + C) Error, terminate everything and exit
 def signal_handler(sig, frame):
@@ -48,7 +50,9 @@ def signal_handler(sig, frame):
     ffmpeg_process.terminate()
     exit(0)
 
+
 signal.signal(signal.SIGINT, signal_handler)
+
 
 # Continue using camera until program terminated
 while True:
