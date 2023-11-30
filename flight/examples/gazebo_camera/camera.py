@@ -14,8 +14,6 @@ async def run():
     drone = System()
     video = Video()
 
-    os.makedirs("data/temp", exist_ok=True)
-
     await drone.connect(system_address="udp://:14540")
 
     print("Waiting for drone to connect...")
@@ -75,7 +73,7 @@ async def run():
         continue
 
     frame = video.frame()
-    string = "data/temp/image.jpg"
+    string = "images/image.jpg"
     cv2.imwrite(string, frame)
     print("Success write image")
 

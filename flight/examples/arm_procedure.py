@@ -54,24 +54,5 @@ async def run():
     await drone.action.arm()
     print("Drone armed.")
 
-    # Upload mission fences
-
-    # Setup waypoint mission
-
-    # Start autopilot
-
-    # Start waypoint mission
-
-    # Upload airdrop fences
-
-    # Airdrop scan
-
-    # Get image detections
-
-    # Do airdrops, possibly return to refuel or refill payloads
-
-    # Return to home
-
-
 if __name__ == "__main__":
     asyncio.run(run())

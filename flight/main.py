@@ -9,21 +9,19 @@ OUTPUT_IMAGE_DIRECTORY = "../vision/images/odlc"
 
 
 async def run():
-
     print("Starting flight software")
 
     # Create image output directory
     if os.path.exists(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY)):
         shutil.rmtree(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY))
-    os.makedirs(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY),
-                exist_ok=True)
+    os.makedirs(os.path.join(os.getcwd(), OUTPUT_IMAGE_DIRECTORY), exist_ok=True)
 
-    # Initialize camera
+    # Initialize camerar
 
     # Post targets
 
     # Connect to drone
-    print('Conencting to drone')
+    print("Conencting to drone")
     drone = System()
     await drone.connect(system_address="udp://:14540")
 
