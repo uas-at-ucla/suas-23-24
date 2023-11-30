@@ -40,6 +40,8 @@ MAVSDK is the Python library used to communicate with the autopilot system. Inst
 pip3 install mavsdk
 ```
 
+**For M1 MacOS Users**
+
 If you are using MacOS with an ARM64 Processor, a manual installation of MAVSDK-Python is required:
 + First clone the MAVSDK-Python library:
 ```bash
@@ -65,6 +67,7 @@ First, start QGroundControl. Then navigate to the `PX4-Autopilot` directory, and
 You should see a simulation window appear, as well as the drone appear in QGroundControl.
 
 **MacOS Requirements**
+
 If you are using MacOS with an ARM64 Processor, a physical install of the MAVSDK server is required:
 + Navigate to the [MAVSDK releases](https://github.com/mavlink/MAVSDK/releases).
 + Install the file labeled, `mavsdk_server_macos`
@@ -83,7 +86,9 @@ drone = System()
 # To this:
 drone = System(mavsdk_server_address="localhost", port= 50051)
 ```
+
 **Running Example Code**
+
 Then, navigate to this directory (`/flight`) and run:
 ```bash
 python example_mission.py
