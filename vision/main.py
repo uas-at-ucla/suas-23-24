@@ -63,6 +63,7 @@ def queue_image_for_odlc():
         img_path = f"{IMG_FOLDER}/{req.pop('img_name')}"
         image_queue.put({"img_path": img_path,
                          "telemetry": req})
+        print(f"Image queued: {img_path}")
 
     except Exception as exc:
         print(repr(exc))
@@ -110,7 +111,7 @@ def process_image_queue(queue):
         task = queue.get()
         img_path = task['img_path']
         telemetry = task['telemetry']
-        print('Processing queued image')
+        print(f'Processing queued image: {img_path}')
         start_time = time.time()
 
         # Process image
