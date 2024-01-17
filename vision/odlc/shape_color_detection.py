@@ -6,7 +6,7 @@ import math
 import vision.util as util
 
 
-class ShapeColorDetector:
+class Model:
     def __init__(self):
         self.model = YOLO('vision/odlc/models/shape_color_checkpoint.pt')
         self.model.info()
