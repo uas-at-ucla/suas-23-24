@@ -2,6 +2,9 @@ version: "3.9"
 services:
   vision:
     build: .
+    environment:
+      - DEBUG=1
+      - DETECTION_TOLERANCE=15
     ports:
       - "8003:8003"
     volumes:

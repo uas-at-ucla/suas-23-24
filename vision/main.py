@@ -14,7 +14,8 @@ from prometheus_flask_exporter import PrometheusMetrics
 from prometheus_client import Counter
 from prometheus_client import Gauge
 
-import odlc.detector as detector
+import vision.util as util
+import vision.odlc.detector as detector
 
 app = Flask(__name__)
 image_queue = Queue()
@@ -40,7 +41,8 @@ def get_best_object_detections():
     """
     top_detections = detector.get_top_detections()
     json_detections = jsonify(top_detections)
-    print(top_detections)
+
+    util.info(f'{top_detections=}')
     return json_detections
 
 
@@ -63,9 +65,10 @@ def queue_image_for_odlc():
         img_path = f"{IMG_FOLDER}/{req.pop('img_name')}"
         image_queue.put({"img_path": img_path,
                          "telemetry": req})
+        util.info(f"Image queued: {img_path}")
 
     except Exception as exc:
-        print(repr(exc))
+        util.error(repr(exc))
         return 'Badly formed image update', 400
 
     queue_size.inc()
@@ -99,7 +102,7 @@ def update_targets():
 
         detector.update_targets(data_list)
     except Exception as exc:
-        print(repr(exc))
+        util.error(repr(exc))
         return 'Badly formed target update', 400
 
     return Response(status=200)
@@ -110,7 +113,7 @@ def process_image_queue(queue):
         task = queue.get()
         img_path = task['img_path']
         telemetry = task['telemetry']
-        print('Processing queued image')
+        util.info(f'Processing queued image: {img_path}')
         start_time = time.time()
 
         # Process image
@@ -122,18 +125,10 @@ def process_image_queue(queue):
         # Delete file and return
         os.remove(img_path)
         queue.task_done()
-        print('Queued image processed')
+        util.info(f'Queued image {img_path} processed')
         images_processed.inc()
         queue_size.dec()
         active_time.inc(time.time() - start_time)
-
-
-@app.route('/process', methods=['POST'])
-def simulate_process_img():
-    images_processed.inc()
-    queue_size.dec()
-    active_time.inc(2)
-    return Response(status=200)
 
 
 worker = Thread(target=process_image_queue, args=(image_queue, ))
