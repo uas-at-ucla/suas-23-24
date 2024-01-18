@@ -29,7 +29,7 @@ async def run():
             print("-- Connected to drone!")
             break
 
-    print("Checking for calibration status")
+    print("Checking for calibration status...")
     async for health in drone.telemetry.health():
         if not health.is_gyrometer_calibration_ok:
             print("Gyrometer requires calibration")
@@ -53,6 +53,25 @@ async def run():
     print("Arming now...")
     await drone.action.arm()
     print("Drone armed.")
+
+    # Upload mission fences
+
+    # Setup waypoint mission
+
+    # Start autopilot
+
+    # Start waypoint mission
+
+    # Upload airdrop fences
+
+    # Airdrop scan
+
+    # Get image detections
+
+    # Do airdrops, possibly return to refuel or refill payloads
+
+    # Return to home
+
 
 if __name__ == "__main__":
     asyncio.run(run())

@@ -4,7 +4,7 @@ Stateful representation of vision system
 
 import json
 import redis
-
+import os
 
 r = redis.Redis(host='redis', port=6379, db=0)
 r.set('detector/detections', json.dumps([]))
@@ -37,12 +37,12 @@ def process_queued_image(img_path, telemetry):
     """
 
     detections = json.loads(r.get('detector/detections'))
-
+    
     # TODO: Get emergent detectins
     # TODO: Get alphanumric detections
     # TODO: If alphanumeric detection found, run odlc
 
     # TODO: Append these detections to the detections variable
-
+    os.remove(img_path)
     json_detections = json.dumps(detections)
     r.set('detector/detections', json_detections)

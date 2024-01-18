@@ -5,7 +5,6 @@ Requests for vision subsystem server
 from queue import Queue
 from threading import Thread
 
-import os
 import time
 import traceback
 
@@ -121,7 +120,6 @@ def process_image_queue(queue):
             traceback.print_exc()
 
         # Delete file and return
-        os.remove(img_path)
         queue.task_done()
         print('Queued image processed')
         images_processed.inc()
