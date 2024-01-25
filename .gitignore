@@ -2,3 +2,5 @@
 */__pycache__/*
 .vscode/*
 *.pyc
+.ccls-cache/
+flight/examples/gphoto2_cpp/build/
