@@ -8,29 +8,6 @@
 #include <gphoto2/gphoto2-camera.h>
 #include <iostream>
 
-static void capture_to_file(char timestamp[80]) {
-  Camera *camera;
-  GPContext *context = gp_context_new();
-  gp_camera_new(&camera);
-  gp_camera_init(camera, context);
-  CameraFile *file; // Defaults to //capt0000.jpg
-  CameraFilePath camera_file_path;
-  std::cout << "Capturing image" << std::endl;
-  gp_camera_capture(camera, GP_CAPTURE_IMAGE, &camera_file_path, context);
-
-  printf("Pathname on camera: %s/%s\n", camera_file_path.folder,
-         camera_file_path.name);
-  // Creating a new file that can be written to
-  int fd = open(timestamp, O_CREAT | O_WRONLY, 0644);
-  gp_file_new_from_fd(&file, fd);
-  gp_camera_file_get(camera, camera_file_path.folder, camera_file_path.name,
-                     GP_FILE_TYPE_NORMAL, file, context);
-  std::cout << "File saved as " << timestamp << ".jpg" << std::endl;
-  gp_camera_file_delete(camera, camera_file_path.folder, camera_file_path.name,
-                        context);
-  std::cout << "File deleted on camera" << std::endl;
-}
-
 static void capture_to_memory(const char **picture_data,
                               unsigned long *picture_size) {
   Camera *camera;
@@ -127,21 +104,21 @@ static void post_request(std::string shared_mem_name) {
 }
 
 int main(int argc, char *argv[]) {
-  std::string shared_mem_name;
-  try {
-    std::string temp_name(argv[1]);
-    shared_mem_name = temp_name;
-  } catch (const std::exception &e) {
-    std::cerr << e.what() << std::endl;
-    shared_mem_name = "PictureData";
-  }
-
   time_t raw_time;
   struct tm *time_info;
   char timestamp[80];
   time(&raw_time);
   time_info = localtime(&raw_time);
   strftime(timestamp, sizeof(timestamp), "%m-%d_%H%M%S", time_info);
+  std::string shared_mem_name;
+
+  try {
+    std::string temp_name(argv[1]);
+    shared_mem_name = temp_name;
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    shared_mem_name = timestamp;
+  }
 
   char *picture_data;
   unsigned long picture_size;

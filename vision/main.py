@@ -62,22 +62,17 @@ def queue_image_for_odlc():
         assert "longitude" in req, "field 'longitude' is missing"
         assert "heading" in req, "field 'heading' is missing"
 
-        """
-        img_path = f"{IMG_FOLDER}/{req.pop('img_name')}"
-        image_queue.put({"img_path": img_path, "telemetry": req})
-        print(f"Image queued: {img_path}")
-        """
+        img_name = req.pop("img_name")
+        # Try to read from shared memory
 
-        with open(f"/dev/shm/{req.pop('img_name')}", "r+b") as f:
+        with open(f"/dev/shm/{img_name}", "r+b") as f:
             mapped_file = mmap.mmap(f.fileno(), 0)
             data = mapped_file.read()
             binary_data = io.BytesIO(data)
             image_array = np.asarray(bytearray(binary_data.read()), dtype=np.uint8)
             image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-
-            cv2.imwrite("image.jpg", image)
-
-        # Try to read from shared memory
+            image_queue.put({"img_name": img_name, "img_data": image, "telemetry": req})
+            print(f"Image queued: {img_name}")
 
     except Exception as exc:
         print(repr(exc))
@@ -123,17 +118,17 @@ def update_targets():
 def process_image_queue(queue):
     while True:
         task = queue.get()
-        img_path = task["img_path"]
+        img_name = task["img_name"]
+        img_data = task["img_data"]
         telemetry = task["telemetry"]
-        print(f"Processing queued image: {img_path}")
+        print(f"Processing queued image: {img_name}")
         start_time = time.time()
 
         # Process image
         try:
-            detector.process_queued_image(img_path, telemetry)
+            detector.process_queued_image(img_data, telemetry)
         except Exception:
             traceback.print_exc()
-
         # Delete file and return
         queue.task_done()
         print("Queued image processed")
