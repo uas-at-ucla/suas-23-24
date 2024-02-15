@@ -10,7 +10,8 @@ class ShapeColorDetectionTests(unittest.TestCase):
     image_2 = cv2.imread(image_path_2)
 
     def test_shape_color_detection(self):
-        results = sorted(shape_color_detection.detect_shape_color(self.image_1))
+        results = sorted(
+            shape_color_detection.detect_shape_color(self.image_1))
         self.assertEqual(results[0], "blue triangle")
         self.assertEqual(results[1], "orange pentagon")
 

@@ -8,6 +8,34 @@
 #include <gphoto2/gphoto2-camera.h>
 #include <iostream>
 
+static void canon_enable_capture(Camera *camera, GPContext *context) {
+  // Set the camera port (you may need to adjust this based on your camera
+  // model)
+  CameraWidget *rootWidget;
+  gp_camera_get_config(camera, &rootWidget, context);
+
+  // Find the capture mode widget
+  CameraWidget *captureModeWidget;
+  gp_widget_get_child_by_name(rootWidget, "capturemode", &captureModeWidget);
+
+  if (captureModeWidget) {
+    // Set the capture mode to "1" (assuming "1" represents continuous shooting
+    // mode)
+    gp_widget_set_value(captureModeWidget, "1");
+
+    // Apply the changes to the camera
+    gp_camera_set_config(camera, rootWidget, context);
+
+    std::cout << "Capture mode set successfully." << std::endl;
+  } else {
+    std::cerr << "Unable to find capture mode widget." << std::endl;
+  }
+
+  // Free the camera context
+  gp_widget_free(rootWidget);
+  gp_camera_free(camera);
+}
+
 static void capture_to_memory(const char **picture_data,
                               unsigned long *picture_size) {
   Camera *camera;
@@ -125,7 +153,7 @@ int main(int argc, char *argv[]) {
   capture_to_memory((const char **)&picture_data, &picture_size);
 
   // Read the binary and store it in a picture file
-  std::string file_type = ".jpg";
+  std::string file_type = ".cr2";
   std::ofstream outputFile(timestamp + file_type, std::ios::binary);
   if (outputFile.is_open()) {
     outputFile.write(picture_data, picture_size);

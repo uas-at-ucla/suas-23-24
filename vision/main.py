@@ -23,7 +23,8 @@ app = Flask(__name__)
 image_queue = Queue()
 
 metrics = PrometheusMetrics(app)
-images_processed = Counter("vision_images_processed_total", "Total Images Processed")
+images_processed = Counter(
+    "vision_images_processed_total", "Total Images Processed")
 queue_size = Gauge("vision_queue_size", "Current Images Queued")
 active_time = Counter("vision_active_time_seconds", "Active Processing Time")
 
@@ -69,11 +70,12 @@ def queue_image_for_odlc():
             mapped_file = mmap.mmap(f.fileno(), 0)
             data = mapped_file.read()
             binary_data = io.BytesIO(data)
-            image_array = np.asarray(bytearray(binary_data.read()), dtype=np.uint8)
+            image_array = np.asarray(
+                bytearray(binary_data.read()), dtype=np.uint8)
             image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-            image_queue.put({"img_name": img_name, "img_data": image, "telemetry": req})
+            image_queue.put(
+                {"img_name": img_name, "img_data": image, "telemetry": req})
             print(f"Image queued: {img_name}")
-
     except Exception as exc:
         print(repr(exc))
         return "Badly formed image update", 400

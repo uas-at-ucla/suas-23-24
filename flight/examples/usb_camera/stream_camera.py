@@ -28,8 +28,8 @@ while True:
     """ Will take a photo every loop up to 1000 photos and store it in the-
         src/ folder
         """
-    file_name = 'images/image' + str(counter) + '.jpg'
-    if(key == ord("c")):
+    file_name = "images/image" + str(counter) + ".jpg"
+    if key == ord("c"):
         cv2.imwrite(file_name, frame)
         print("Captured an Image")
         counter = counter + 1
