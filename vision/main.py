@@ -11,6 +11,7 @@ import mmap
 import io
 import numpy as np
 import cv2
+import os
 
 from flask import Flask, Response, request, jsonify
 from prometheus_flask_exporter import PrometheusMetrics
@@ -64,18 +65,26 @@ def queue_image_for_odlc():
         assert "heading" in req, "field 'heading' is missing"
 
         img_name = req.pop("img_name")
-        # Try to read from shared memory
 
+        # Try to read from shared memory object
         with open(f"/dev/shm/{img_name}", "r+b") as f:
+            # Access file and its data from shared memory using a memory map
             mapped_file = mmap.mmap(f.fileno(), 0)
             data = mapped_file.read()
+
+            # Convert the data into a numpy binary array into a cv2 image
             binary_data = io.BytesIO(data)
             image_array = np.asarray(
                 bytearray(binary_data.read()), dtype=np.uint8)
             image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+            # Queue the image then delete the shared memory object
             image_queue.put(
                 {"img_name": img_name, "img_data": image, "telemetry": req})
             print(f"Image queued: {img_name}")
+            os.remove(f"/dev/shm/{img_name}")
+            print(f"Image removed from shared memory: {img_name}")
+
     except Exception as exc:
         print(repr(exc))
         return "Badly formed image update", 400
