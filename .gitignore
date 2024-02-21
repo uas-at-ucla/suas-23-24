@@ -4,3 +4,4 @@
 *.pyc
 .ccls-cache/
 flight/examples/gphoto2_cpp/build/
+.DS_Store
