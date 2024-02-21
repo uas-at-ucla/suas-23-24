@@ -5,9 +5,13 @@ Requests for vision subsystem server
 from queue import Queue
 from threading import Thread
 
-import os
 import time
 import traceback
+import mmap
+import io
+import numpy as np
+import cv2
+import os
 
 from flask import Flask, Response, request, jsonify
 from prometheus_flask_exporter import PrometheusMetrics
@@ -20,20 +24,20 @@ app = Flask(__name__)
 image_queue = Queue()
 
 metrics = PrometheusMetrics(app)
-images_processed = Counter('vision_images_processed_total',
-                           'Total Images Processed')
-queue_size = Gauge('vision_queue_size', 'Current Images Queued')
-active_time = Counter('vision_active_time_seconds', 'Active Processing Time')
+images_processed = Counter(
+    "vision_images_processed_total", "Total Images Processed")
+queue_size = Gauge("vision_queue_size", "Current Images Queued")
+active_time = Counter("vision_active_time_seconds", "Active Processing Time")
 
-IMG_FOLDER = '/app/vision/images/odlc'
+IMG_FOLDER = "/app/vision/images/odlc"
 
 
-@app.route('/')
+@app.route("/")
 def index():
-    return 'Hello world!\n'
+    return "Hello world!\n"
 
 
-@app.route('/odlc', methods=['GET'])
+@app.route("/odlc", methods=["GET"])
 def get_best_object_detections():
     """
     Get most certain object detections
@@ -44,7 +48,7 @@ def get_best_object_detections():
     return json_detections
 
 
-@app.route('/odlc', methods=['POST'])
+@app.route("/odlc", methods=["POST"])
 def queue_image_for_odlc():
     """
     Queue image POST request
@@ -54,25 +58,42 @@ def queue_image_for_odlc():
     # If any info is missing, throw an error
     try:
         req = request.json
-        assert 'img_name' in req, "field 'img_name' is missing"
-        assert 'altitude' in req, "field 'altitude' is missing"
-        assert 'latitude' in req, "field 'latitude' is missing"
-        assert 'longitude' in req, "field 'longitude' is missing"
-        assert 'heading' in req, "field 'heading' is missing"
+        assert "img_name" in req, "field 'img_name' is missing"
+        assert "altitude" in req, "field 'altitude' is missing"
+        assert "latitude" in req, "field 'latitude' is missing"
+        assert "longitude" in req, "field 'longitude' is missing"
+        assert "heading" in req, "field 'heading' is missing"
 
-        img_path = f"{IMG_FOLDER}/{req.pop('img_name')}"
-        image_queue.put({"img_path": img_path,
-                         "telemetry": req})
+        img_name = req.pop("img_name")
+
+        # Try to read from shared memory object
+        with open(f"/dev/shm/{img_name}", "r+b") as f:
+            # Access file and its data from shared memory using a memory map
+            mapped_file = mmap.mmap(f.fileno(), 0)
+            data = mapped_file.read()
+
+            # Convert the data into a numpy binary array into a cv2 image
+            binary_data = io.BytesIO(data)
+            image_array = np.asarray(
+                bytearray(binary_data.read()), dtype=np.uint8)
+            image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+            # Queue the image then delete the shared memory object
+            image_queue.put(
+                {"img_name": img_name, "img_data": image, "telemetry": req})
+            print(f"Image queued: {img_name}")
+            os.remove(f"/dev/shm/{img_name}")
+            print(f"Image removed from shared memory: {img_name}")
 
     except Exception as exc:
         print(repr(exc))
-        return 'Badly formed image update', 400
+        return "Badly formed image update", 400
 
     queue_size.inc()
     return Response(status=200)
 
 
-@app.route('/targets', methods=['POST'])
+@app.route("/targets", methods=["POST"])
 def update_targets():
     """
     Update target POST request
@@ -84,23 +105,23 @@ def update_targets():
         data_list = request.get_json()
 
         for data in data_list:
-            if data['type'] == 'emergent':
+            if data["type"] == "emergent":
                 assert len(data.keys()) == 1
-            elif data['type'] == 'alphanumeric':
+            elif data["type"] == "alphanumeric":
                 assert len(data.keys()) == 2
-                data_class = data['class']
+                data_class = data["class"]
                 assert len(data_class) == 4
-                assert type(data_class['shape-color']) is str
-                assert type(data_class['text-color']) is str
-                assert type(data_class['text']) is str
-                assert type(data_class['shape']) is str
+                assert type(data_class["shape-color"]) is str
+                assert type(data_class["text-color"]) is str
+                assert type(data_class["text"]) is str
+                assert type(data_class["shape"]) is str
             else:
-                raise Exception('Type not recognized')
+                raise Exception("Type not recognized")
 
         detector.update_targets(data_list)
     except Exception as exc:
         print(repr(exc))
-        return 'Badly formed target update', 400
+        return "Badly formed target update", 400
 
     return Response(status=200)
 
@@ -108,34 +129,25 @@ def update_targets():
 def process_image_queue(queue):
     while True:
         task = queue.get()
-        img_path = task['img_path']
-        telemetry = task['telemetry']
-        print('Processing queued image')
+        img_name = task["img_name"]
+        img_data = task["img_data"]
+        telemetry = task["telemetry"]
+        print(f"Processing queued image: {img_name}")
         start_time = time.time()
 
         # Process image
         try:
-            detector.process_queued_image(img_path, telemetry)
+            detector.process_queued_image(img_data, telemetry)
         except Exception:
             traceback.print_exc()
-
         # Delete file and return
-        os.remove(img_path)
         queue.task_done()
-        print('Queued image processed')
+        print("Queued image processed")
         images_processed.inc()
         queue_size.dec()
         active_time.inc(time.time() - start_time)
 
 
-@app.route('/process', methods=['POST'])
-def simulate_process_img():
-    images_processed.inc()
-    queue_size.dec()
-    active_time.inc(2)
-    return Response(status=200)
-
-
-worker = Thread(target=process_image_queue, args=(image_queue, ))
+worker = Thread(target=process_image_queue, args=(image_queue,))
 worker.setDaemon(True)
 worker.start()

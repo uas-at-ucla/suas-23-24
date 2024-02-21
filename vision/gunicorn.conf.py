@@ -14,7 +14,7 @@ class CustomGunicornLogger(glogging.Logger):
 
 class PrometheusMetricsFilter(logging.Filter):
     def filter(self, record):
-        return record.args['U'] != '/metrics'
+        return record.args['U'] not in ['/metrics', '/favicon.ico']
 
 
 accesslog = '-'
