@@ -30,7 +30,7 @@ while True:
         src/ folder
     """
     file_name = 'images/image' + str(counter) + '.jpg'
-    if(counter < 1000):
+    if (counter < 1000):
         cv2.imwrite(file_name, frame)
         print("Captured an Image")
         counter = counter + 1
