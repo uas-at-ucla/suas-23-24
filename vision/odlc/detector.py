@@ -6,7 +6,7 @@ import math
 import json
 import redis
 
-from vision.odlc import shape_color_detection
+# from vision.odlc import shape_color_detection
 
 r = redis.Redis(host='redis', port=6379, db=0)
 
@@ -66,11 +66,11 @@ def process_queued_image(img_data, telemetry):
 
     detections = json.loads(r.get("detector/detections"))
 
-    # TODO: Get emergent detectins
-    # TODO: Get alphanumric detections
-    # TODO: If alphanumeric detection found, run odlc
+    # TODO: Get emergent detections. Combine into a previous one if similar
+    # TODO: Get alphanumric detections. Combine into a previous one if similar
+    # TODO: If new alphanumeric detection found, run odlc
 
     # TODO: Append these detections to the detections variable
-    shape_color_detection.detect_shape_color(img_data)
+    # shape_color_detection.detect_shape_color(img_data)
     json_detections = json.dumps(detections)
     r.set("detector/detections", json_detections)

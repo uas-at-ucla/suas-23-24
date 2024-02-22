@@ -19,18 +19,17 @@ class Model:
             for class_name in f.read().splitlines():
                 self.classes.append(class_name)
 
-
         # define device
         if torch.cuda.is_available():
-            print(torch.cuda.get_device_name(0))
-            print(torch.cuda.get_device_properties(0))
+            util.info(torch.cuda.get_device_name(0))
+            util.info(torch.cuda.get_device_properties(0))
         else:
-            print("CPU")
+            util.info("CPU")
 
     def detect_shape_color(self, frame):
         results = self.model(frame, verbose=False)
         ans = []
-        
+
         for r in results:
             boxes = r.boxes
             for box in boxes:
@@ -51,6 +50,6 @@ class Model:
                         1,
                         (255, 0, 0),
                         1,
-                )
-                    ans.append(self.classes[cls])
+                    )
+                ans.append(self.classes[cls])
         return ans
