@@ -9,6 +9,7 @@ services:
       - "8003:8003"
     volumes:
       - .:/app/
+      - /dev/shm:/dev/shm
     logging:
       driver: loki
       options:
