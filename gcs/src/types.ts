@@ -1,10 +1,16 @@
 export interface LocationUpdatePayload {
-    type?: string;
+    orientation: {
+        pitch?: number;
+        roll?: number;
+        yaw?: number;
+    };
+    GPS: {
+        lat?: number;
+        lon?: number;
+        alt?: number;
+    };
     altitude?: number;
-    rotation?: number;
-    x?: number;
-    y?: number;
-    z?: number;
+    battery?: number;
 }
 
 export interface PromethusDataType {

@@ -6,10 +6,11 @@
 	import { dataStore } from '../stores';
 	import Performance from '../components/Performance.svelte';
 	import { PUBLIC_LOCAL_WS } from '$env/static/public';
+	
 
-	let displayData = {};
-
+	
 	let count = 0;
+	
 
 	onMount(() => {
 		const client = new WebSocket(PUBLIC_LOCAL_WS);
@@ -17,7 +18,7 @@
 		client.addEventListener('message', (event) => {
 			const data = JSON.parse(event.data);
 
-			if (data.type === 'location_update') {
+			if (data.type === 'attitude') {
 				dataStore.set(data);
 			}
 		});
