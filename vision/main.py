@@ -18,7 +18,8 @@ from prometheus_flask_exporter import PrometheusMetrics
 from prometheus_client import Counter
 from prometheus_client import Gauge
 
-import odlc.detector as detector
+import vision.util as util
+import vision.odlc.detector as detector
 
 app = Flask(__name__)
 image_queue = Queue()
@@ -44,7 +45,8 @@ def get_best_object_detections():
     """
     top_detections = detector.get_top_detections()
     json_detections = jsonify(top_detections)
-    print(top_detections)
+
+    util.info(f'{top_detections=}')
     return json_detections
 
 
@@ -81,9 +83,9 @@ def queue_image_for_odlc():
             # Queue the image then delete the shared memory object
             image_queue.put(
                 {"img_name": img_name, "img_data": image, "telemetry": req})
-            print(f"Image queued: {img_name}")
+            util.info(f"Image queued: {img_name}")
             os.remove(f"/dev/shm/{img_name}")
-            print(f"Image removed from shared memory: {img_name}")
+            util.info(f"Image removed from shared memory: {img_name}")
 
     except Exception as exc:
         print(repr(exc))
@@ -120,8 +122,8 @@ def update_targets():
 
         detector.update_targets(data_list)
     except Exception as exc:
-        print(repr(exc))
-        return "Badly formed target update", 400
+        util.error(repr(exc))
+        return 'Badly formed target update', 400
 
     return Response(status=200)
 
@@ -132,7 +134,7 @@ def process_image_queue(queue):
         img_name = task["img_name"]
         img_data = task["img_data"]
         telemetry = task["telemetry"]
-        print(f"Processing queued image: {img_name}")
+        util.info(f"Processing queued image: {img_name}")
         start_time = time.time()
 
         # Process image
@@ -142,12 +144,12 @@ def process_image_queue(queue):
             traceback.print_exc()
         # Delete file and return
         queue.task_done()
-        print("Queued image processed")
+        util.info("Queued image processed")
         images_processed.inc()
         queue_size.dec()
         active_time.inc(time.time() - start_time)
 
 
-worker = Thread(target=process_image_queue, args=(image_queue,))
+worker = Thread(target=process_image_queue, args=(image_queue, ))
 worker.setDaemon(True)
 worker.start()
