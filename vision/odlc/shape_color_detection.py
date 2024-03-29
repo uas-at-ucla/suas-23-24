@@ -10,7 +10,17 @@ import vision.util as util
 
 class Model:
     def __init__(self):
+        # define device
+        if torch.cuda.is_available():
+            util.info(torch.cuda.get_device_name(0))
+            util.info(torch.cuda.get_device_properties(0))
+            self.device = 0
+        else:
+            util.info("CPU")
+            self.device = 'cpu'
+
         self.model = YOLO('/app/vision/odlc/models/shape_color_checkpoint.pt')
+        self.model.to(self.device)
         self.model.info()
 
         # get class names
@@ -19,15 +29,8 @@ class Model:
             for class_name in f.read().splitlines():
                 self.classes.append(class_name)
 
-        # define device
-        if torch.cuda.is_available():
-            util.info(torch.cuda.get_device_name(0))
-            util.info(torch.cuda.get_device_properties(0))
-        else:
-            util.info("CPU")
-
     def detect_shape_color(self, frame):
-        results = self.model(frame, verbose=False)
+        results = self.model(frame, device=self.device, verbose=False)
         ans = []
 
         for r in results:

@@ -17,6 +17,13 @@ Build and run the Docker image:
 make build
 make run
 ```
+
+Alternatively, if on an ARM CPU:
+```
+make build-arm
+make run
+```
+
 The server will now be serving requests at localhost:8003. To test your
 installation, go to [localhost:8003](http://localhost:8003) in your browser.
 If you see "Hello World!" then your installation is working!
@@ -33,3 +40,9 @@ To see server visualization, go to [localhost:3000](http://localhost:3000) and n
 + To view docker containers: `docker ps -a`
 + To view logs of processes within a container: `docker logs [container ID]`
 + To clean up dangling docker images, containers, etc.: `docker system prune`
+
+## To use GPU in Docker Containers:
++ Install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
++ Uncomment lines 14-20 in `docker-compose.yml`
+
+Note: If running on the Jetson, change the Dockerfile on line 5 of `docker-compose.yml` to `Dockerfile-jetson`
