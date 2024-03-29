@@ -1,3 +1,6 @@
+# DO NOT add torch, torchvision, torchaudio, or ultralytics
+# since they are installed with the base docker image
+
 Flask==3.0.0
 gunicorn==21.2.0
 opencv-python==4.8.1.78

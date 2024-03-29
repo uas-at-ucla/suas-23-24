@@ -8,7 +8,7 @@ build-arm:
 	docker compose build
 	
 run:
-	docker compose up -d
+	docker compose build && docker compose up -d
 	
 restart:
 	docker compose restart
