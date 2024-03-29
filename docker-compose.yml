@@ -11,13 +11,13 @@ services:
     volumes:
       - .:/app/
       - /dev/shm:/dev/shm
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
     logging:
       driver: loki
       options:
