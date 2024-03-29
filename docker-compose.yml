@@ -1,6 +1,8 @@
 services:
   vision:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - DEBUG=1
       - DETECTION_TOLERANCE=15
@@ -9,6 +11,13 @@ services:
     volumes:
       - .:/app/
       - /dev/shm:/dev/shm
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     logging:
       driver: loki
       options:
