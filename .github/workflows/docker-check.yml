@@ -10,10 +10,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Build the Docker containers
+    - name: Clear disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+    - name: Build Docker containers
       run: make build
 
-    - name: Start Docker container
+    - name: Start Docker containers
       run: make run
 
     - name: Run unit tests
