@@ -1,0 +1,29 @@
+# Jetpack 6
+FROM dustynv/l4t-pytorch:r36.2.0
+
+# ultralytics dockerfile for jetson: https://github.com/ultralytics/ultralytics/blob/main/docker/Dockerfile-jetson
+ADD https://github.com/ultralytics/assets/releases/download/v0.0.0/Arial.ttf \
+    https://github.com/ultralytics/assets/releases/download/v0.0.0/Arial.Unicode.ttf \
+    /root/.config/Ultralytics/
+RUN apt update \
+    && apt install --no-install-recommends -y gcc git zip curl htop libgl1 libglib2.0-0 libpython3-dev gnupg g++ libusb-1.0-0
+WORKDIR /usr/src/ultralytics
+RUN git clone https://github.com/ultralytics/ultralytics -b main /usr/src/ultralytics
+# ultralytics 8.1.10
+RUN git reset --hard da408394510f536cffc429ce680e22b910033c29
+ADD https://github.com/ultralytics/assets/releases/download/v8.1.0/yolov8n.pt /usr/src/ultralytics/
+RUN grep -v "opencv-python" pyproject.toml > temp.toml && mv temp.toml pyproject.toml
+RUN python3 -m pip install --upgrade pip wheel
+RUN pip install --no-cache tqdm matplotlib pyyaml psutil pandas onnx "numpy==1.23"
+RUN pip install --no-cache -e .
+ENV OMP_NUM_THREADS=1
+
+# install libraries
+RUN apt-get update --allow-releaseinfo-change --fix-missing && \
+    DEBIAN_FRONTEND=noninteractive apt-get install ffmpeg libsm6 libxext6 -y
+COPY vision/requirements.txt /vision/
+RUN pip3 install -r /vision/requirements.txt --ignore-installed blinker
+
+COPY . /app
+WORKDIR /app
+CMD ["bash","./vision/start_gunicorn.sh"]

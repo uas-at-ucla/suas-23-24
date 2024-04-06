@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 
+import vision.util as util
+
 
 def get_detection_confidence_array(given_patterns, detection_list,
                                    n_detections, confidence_table):
@@ -44,5 +46,5 @@ def match_detections_and_patterns(n_detections, given_patterns,
             'letter': str(given_patterns[x]['letter'])
         }
 
-    print(ans)
+    util.info(ans)
     return ans

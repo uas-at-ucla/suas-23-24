@@ -29,7 +29,7 @@ async def run():
             print("-- Connected to drone!")
             break
 
-    print("Checking for calibration status")
+    print("Checking for calibration status...")
     async for health in drone.telemetry.health():
         if not health.is_gyrometer_calibration_ok:
             print("Gyrometer requires calibration")
