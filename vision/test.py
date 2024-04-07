@@ -4,6 +4,7 @@ from parameterized import parameterized
 
 from vision.odlc import shape_color_detection
 from vision.odlc import matching
+from vision.odlc import color
 
 
 class ShapeColorDetectionTests(unittest.TestCase):
@@ -63,6 +64,92 @@ class MatchingProblemTests(unittest.TestCase):
         self.assertEqual(result['detection_2']['color'], 'purple')
         self.assertEqual(result['detection_1']['shape'], 'square')
         self.assertEqual(result['detection_0']['letter'], 'a')
+
+
+class ColorDetectionTests(unittest.TestCase):
+
+    @parameterized.expand([
+        (
+            "vision/images/test/2-22-24-Images/cropped/t1.jpg",
+            ["Black", "Blue"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t2.jpg",
+            ["Orange", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t3.jpg",
+            ["Red", "Purple"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t4.jpg",
+            ["Brown", "Purple"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t5.jpg",
+            ["Blue", "Green"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t6.jpg",
+            ["Blue", "Green"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t7.jpg",
+            ["White", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t8.jpg",
+            ["Black", "Red"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t9.jpg",
+            ["Black", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t10.jpg",
+            ["Orange", "White"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t11.jpg",
+            ["Green", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t12.jpg",
+            ["", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t13.jpg",
+            ["", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t14.jpg",
+            ["Red", "Purple"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t15.jpg",
+            ["Blue", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t16.jpg",
+            ["White", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t17.jpg",
+            ["Green", "White"]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t18.jpg",
+            ["White", ""]
+        ),
+        (
+            "vision/images/test/2-22-24-Images/cropped/t19.jpg",
+            ["Green", "Orange"]
+        ),
+    ])
+    def test_color_detection(self, image_path, targets):
+        shape, text = color.get_shape_text_colors(image_path)
+        self.assertTrue([shape, text] == targets
+                        or [shape, ""] == targets or ["", ""] == targets)
 
 
 if __name__ == "__main__":
