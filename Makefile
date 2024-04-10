@@ -21,8 +21,8 @@ kill:
 	
 test:
 	$(MAKE) run
-	docker exec uas-2024-vision-1 python3 -m unittest
+	docker exec uas-2024-vision-1 pytest --durations=0
 		
 coverage:
 	$(MAKE) run
-	docker exec uas-2024-vision-1 bash -c "coverage run -m unittest; coverage xml -i"
+	docker exec uas-2024-vision-1 bash -c "coverage run -m pytest; coverage html -i"
