@@ -2,10 +2,14 @@ services:
   vision:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-jetson
     environment:
       - DEBUG=1
       - DETECTION_TOLERANCE=15
+      - ALPHANUMERIC_MODEL_STEP=1080
+      - ALPHANUMERIC_MODEL_FRAME_SIZE=1280
+      - ALPHANUMERIC_MODEL_ITERATIONS=12
+      - ALPHANUMERIC_MODEL_CROP_AMOUNT=10
     ports:
       - "8003:8003"
     volumes:

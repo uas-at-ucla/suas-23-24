@@ -1,30 +1,31 @@
 import pytest
 import cv2
 
-from vision.odlc import shape_color_detection
+from vision.odlc.alphanumeric_pipeline import TargetShapeText
 from vision.odlc import matching
 from vision.odlc import color_detection
 
 
-class TestShapeColorDetection:
+class TestTargetDetection:
 
-    image_path_1 = "vision/images/test/shape_color_detection_1.jpg"
-    image_path_2 = "vision/images/test/shape_color_detection_2.jpg"
+    image_path_1 = "/app/vision/images/test/alphanumeric_detection_1.png"
+    image_path_2 = "/app/vision/images/test/alphanumeric_detection_2.png"
 
     @classmethod
     def setup_class(cls):
-        cls.model = shape_color_detection.Model()
+        cls.model = TargetShapeText()
 
     def test_shape_color_detection_1(self):
-        results = sorted(self.model.detect_shape_color(
-            cv2.imread(self.image_path_1)))
-        assert results[0] == "blue triangle"
-        assert results[1] == "orange pentagon"
+        self.model.run(cv2.imread(self.image_path_1))
+        results = self.model.get_boxes()
+        print(f"{results=}")
+        assert len(results) > 0
 
     def test_shape_color_detection_2(self):
-        results = sorted(self.model.detect_shape_color(
-            cv2.imread(self.image_path_2)))
-        assert results == []
+        self.model.run(cv2.imread(self.image_path_2))
+        results = self.model.get_boxes()
+        print(f"{results=}")
+        assert len(results) > 0
 
 
 class TestMatchingProblem:
