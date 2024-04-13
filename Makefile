@@ -6,7 +6,10 @@ build:
 build-arm:
 	docker plugin install miacis/loki-docker-driver --alias loki --grant-all-permissions
 	docker compose build
-	
+
+clean:
+	find vision/images/debug -type f -iname \*.png -delete
+
 run:
 	python3 sys_check.py && docker compose build && docker compose up -d
 	

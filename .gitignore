@@ -6,4 +6,4 @@
 flight/examples/gphoto2_cpp/build/
 .DS_Store
 .coverage
-/vision/images/debug/*
+/vision/images/debug/*.png

@@ -2,14 +2,14 @@ import numpy as np
 import cv2
 import os
 import time
-import onnxruntime as ort
-from threading import Thread
+import tensorrt as trt
 
+from vision.odlc import trt_common
 import vision.util as util
 
 
 # File Paths
-TARGET_CHECKPOINT_FILE = "/app/vision/odlc/models/alphanumeric_detection.onnx"
+TARGET_CHECKPOINT_FILE = "/app/vision/odlc/models/detector.engine"
 SHAPE_COLOR_CKPT_FILE = ""
 
 # MODEL CONSTANTS (DO NOT CHANGE)
@@ -18,7 +18,21 @@ FRAME_SIZE = int(os.getenv("ALPHANUMERIC_MODEL_FRAME_SIZE"))
 ITERATIONS = int(os.getenv("ALPHANUMERIC_MODEL_ITERATIONS"))
 CROP_AMNT = int(os.getenv("ALPHANUMERIC_MODEL_CROP_AMOUNT"))
 
+CONF_THRESHOLD = float(os.getenv("ALPHANUMERIC_MODEL_CONF_THRESHOLD"))
+IOU_THRESHOLD = float(os.getenv("ALPHANUMERIC_MODEL_IOU_THRESHOLD"))
+
 DEBUGGING = int(os.getenv("DEBUG"))
+
+INPUT_SIZE = 640
+TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
+
+
+def load_engine(model_file):
+    with open(model_file, "rb") as f:
+        engine_bytes = f.read()
+    
+    runtime = trt.Runtime(TRT_LOGGER)
+    return runtime.deserialize_cuda_engine(engine_bytes)
 
 
 def compute_iou(box, boxes):
@@ -85,26 +99,14 @@ def xywh2xyxy(x):
     return y
 
 class TargetShapeText:
-    # initialization
-    def __init__(self):
-        # NMS + Detection constants
-        self.conf_threshold = 0.4
-        self.iou_threshold = 0.4
 
-        # initialize model
-        self.session = ort.InferenceSession(
-            TARGET_CHECKPOINT_FILE, 
-            providers=['CUDAExecutionProvider']
-        )
-        model_inputs = self.session.get_inputs()
-        self.input_names = [model_inputs[i].name
-            for i in range(len(model_inputs))]
-        self.input_shape = model_inputs[0].shape
-        self.input_height = self.input_shape[2]
-        self.input_width = self.input_shape[3]
-        model_outputs = self.session.get_outputs()
-        self.output_names = [model_outputs[i].name
-            for i in range(len(model_outputs))]
+    def __init__(self):
+
+        # initialize model, allocate memory
+        self.engine = load_engine(TARGET_CHECKPOINT_FILE)
+
+        self.inputs, self.outputs, self.bindings, self.stream = trt_common.allocate_buffers(self.engine)
+        self.context = self.engine.create_execution_context()
 
         # declare return values
         self.model = None
@@ -112,12 +114,15 @@ class TargetShapeText:
         self.shapes = None
         self.texts = None
 
-        util.info(f"{ort.get_device()=}")
+    
+    # need to free gpu memory
+    def __del__(self):
+        trt_common.free_buffers(self.inputs, self.outputs, self.stream)
 
 
     # run text model
     def __runText(self, img):
-        input_img = np.zeros((640,640,3),dtype=np.uint8)
+        input_img = np.zeros((INPUT_SIZE, INPUT_SIZE, 3),dtype=np.uint8)
         for i,box in enumerate(self.boxes):
             frame = img[
                 box[1]+CROP_AMNT:box[3]-CROP_AMNT,
@@ -135,41 +140,44 @@ class TargetShapeText:
     # run target model
     def run(self, img, text=False):
 
-        # THREADING FUNCTION
         def run_model(input_tensor, results, index, row, col):
-            outputs = self.session.run(self.output_names,
-                                       {self.input_names[0]: input_tensor})
-            boxes, _, _ = self.process_output(outputs)
+
+            # copy input tensor to gpu memory
+            np.copyto(self.inputs[0].host, input_tensor.ravel())
+
+            outputs = trt_common.do_inference(
+                self.context,
+                engine=self.engine,
+                bindings=self.bindings,
+                inputs=self.inputs,
+                outputs=self.outputs,
+                stream=self.stream
+            )
+
+            boxes, _, _ = self.process_output(outputs[0])
             result = np.zeros((len(boxes),4), dtype=np.int32)
             add_frame = np.array([col, row, col, row])
             for i, box in enumerate(boxes):
                 result[i] = box.astype(int) + add_frame
             results[index] = result
 
+
         # SLIDING WINDOW
-        threads = [None] * ITERATIONS
         self.boxes = [None] * ITERATIONS
         count = 0
         for row in range(0, img.shape[0] - FRAME_SIZE, STEP):
-            for col in range(0,img.shape[1] - FRAME_SIZE, STEP):
+            for col in range(0, img.shape[1] - FRAME_SIZE, STEP):
                 frame = img[row:row+FRAME_SIZE,col:col+FRAME_SIZE]
-                self.img_height, self.img_width = frame.shape[:2]
-                resized = cv2.resize(frame, (640,640))
+                resized = cv2.resize(frame, (INPUT_SIZE, INPUT_SIZE))
                 resized = cv2.cvtColor(
                     cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)[:,:,0],
                     cv2.COLOR_BGR2RGB) / 255
                 resized = resized.transpose(2, 0, 1)
-                input_tensor = resized[np.newaxis, :, :, :].astype(np.float16)
-                threads[count] = Thread(
-                    target = run_model,
-                    args=(input_tensor, self.boxes, count, row, col)
-                )
-                threads[count].start()
+                input_tensor = resized[np.newaxis, :, :, :].astype(np.float32)
+
+                run_model(input_tensor, self.boxes, count, row, col)
                 count += 1
 
-        # JOIN THREADS
-        for i in range(ITERATIONS):
-            threads[i].join()
 
         # SQUEEZE BOXES TO EASILY READABLE ARRAY
         squeezed_results = []
@@ -192,18 +200,21 @@ class TargetShapeText:
     # Getters
     def get_boxes(self) -> np.ndarray:  
         return self.boxes
+    
     def get_shapes(self) -> np.ndarray:
         return self.shapes
+    
     def get_text(self) -> np.ndarray:
         return self.texts
     
     def process_output(self, output):
-        predictions = np.squeeze(output[0]).T
+        output = output.reshape(1, 5, -1)
+        predictions = np.squeeze(output).T
 
         # Filter out object confidence scores below threshold
         scores = np.max(predictions[:, 4:], axis=1)
-        predictions = predictions[scores > self.conf_threshold, :]
-        scores = scores[scores > self.conf_threshold]
+        predictions = predictions[scores > CONF_THRESHOLD, :]
+        scores = scores[scores > CONF_THRESHOLD]
 
         if len(scores) == 0:
             return [], [], []
@@ -215,7 +226,7 @@ class TargetShapeText:
         boxes = self.extract_boxes(predictions)
 
         # Apply non-maxima suppression to suppress weak, overlapping bounding boxes
-        indices = nms(boxes, scores, self.iou_threshold)
+        indices = nms(boxes, scores, IOU_THRESHOLD)
         indices = keepSquare(boxes, indices=indices)
 
         return boxes[indices], scores[indices], class_ids[indices]
@@ -235,8 +246,8 @@ class TargetShapeText:
     def rescale_boxes(self, boxes):
 
         # Rescale boxes to original image dimensions
-        input_shape = np.array([self.input_width, self.input_height, self.input_width, self.input_height])
+        input_shape = np.array([INPUT_SIZE] * 4)
         boxes = np.divide(boxes, input_shape, dtype=np.float32)
-        boxes *= np.array([self.img_width, self.img_height, self.img_width, self.img_height])
+        boxes *= FRAME_SIZE
         return boxes
     

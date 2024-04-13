@@ -1,5 +1,5 @@
 # Jetpack 6
-FROM dustynv/sam:r36.2.0
+FROM dustynv/l4t-pytorch:r36.2.0
 
 # ultralytics dockerfile for jetson: https://github.com/ultralytics/ultralytics/blob/main/docker/Dockerfile-jetson
 ADD https://github.com/ultralytics/assets/releases/download/v0.0.0/Arial.ttf \

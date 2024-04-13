@@ -15,6 +15,10 @@ class TestTargetDetection:
     def setup_class(cls):
         cls.model = TargetShapeText()
 
+    @classmethod
+    def teardown_class(cls):
+        del cls.model
+
     def test_shape_color_detection_1(self):
         self.model.run(cv2.imread(self.image_path_1))
         results = self.model.get_boxes()
