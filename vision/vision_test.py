@@ -1,11 +1,16 @@
 import pytest
 import cv2
+import os
 
 from vision.odlc.alphanumeric_pipeline import TargetShapeText
 from vision.odlc import matching
 from vision.odlc import color_detection
 
 
+@pytest.mark.skipif(
+    os.getenv("DOCKERFILE") != "Dockerfile-jetson",
+    reason="TensorRT engine compiled only for Jetson"
+)
 class TestTargetDetection:
 
     image_path_1 = "/app/vision/images/test/alphanumeric_detection_1.png"
@@ -100,7 +105,7 @@ class TestColorDetection:
         assert shape_color_1 == "Black"
         assert text_color_1 == "Blue"
 
-    @pytest.mark.skip(reason="text color fails")
+    @pytest.mark.xfail(reason="text color fails")
     def test_color_detection_2(self):
         shape_color_2, text_color_2 = color_detection.get_shape_text_colors(
             self.image_path_2)
@@ -131,7 +136,7 @@ class TestColorDetection:
         assert shape_color_6 == "Blue"
         assert text_color_6 == "Green"
 
-    @pytest.mark.skip(reason="text color fails")
+    @pytest.mark.xfail(reason="text color fails")
     def test_color_detection_7(self):
         shape_color_7, text_color_7 = color_detection.get_shape_text_colors(
             self.image_path_7)
@@ -144,7 +149,7 @@ class TestColorDetection:
         assert shape_color_8 == "Black"
         assert text_color_8 == "Red"
 
-    @pytest.mark.skip(reason="text color fails")
+    @pytest.mark.xfail(reason="text color fails")
     def test_color_detection_9(self):
         shape_color_9, text_color_9 = color_detection.get_shape_text_colors(
             self.image_path_9)
@@ -157,21 +162,20 @@ class TestColorDetection:
         assert shape_color_10 == "Orange"
         assert text_color_10 == "White"
 
-    @pytest.mark.skip(reason="text color fails")
     def test_color_detection_11(self):
         shape_color_11, text_color_11 = color_detection.get_shape_text_colors(
             self.image_path_11)
         assert shape_color_11 == "Green"
         assert text_color_11 == "Brown"
 
-    @pytest.mark.skip(reason="both shape and text colors fail")
+    @pytest.mark.xfail(reason="both shape and text colors fail")
     def test_color_detection_12(self):
         shape_color_12, text_color_12 = color_detection.get_shape_text_colors(
             self.image_path_12)
         assert shape_color_12 == "Purple"
         assert text_color_12 == "Black"
 
-    @pytest.mark.skip(reason="both shape and text colors fail")
+    @pytest.mark.xfail(reason="both shape and text colors fail")
     def test_color_detection_13(self):
         shape_color_13, text_color_13 = color_detection.get_shape_text_colors(
             self.image_path_13)
@@ -184,14 +188,14 @@ class TestColorDetection:
         assert shape_color_14 == "Red"
         assert text_color_14 == "Purple"
 
-    @pytest.mark.skip(reason="text color fails")
+    @pytest.mark.xfail(reason="text color fails")
     def test_color_detection_15(self):
         shape_color_15, text_color_15 = color_detection.get_shape_text_colors(
             self.image_path_15)
         assert shape_color_15 == "Blue"
         assert text_color_15 == "Red"
 
-    @pytest.mark.skip(reason="text color fails")
+    @pytest.mark.xfail(reason="text color fails")
     def test_color_detection_16(self):
         shape_color_16, text_color_16 = color_detection.get_shape_text_colors(
             self.image_path_16)
@@ -204,7 +208,7 @@ class TestColorDetection:
         assert shape_color_17 == "Green"
         assert text_color_17 == "White"
 
-    @pytest.mark.skip(reason="text color fails")
+    @pytest.mark.xfail(reason="text color fails")
     def test_color_detection_18(self):
         shape_color_18, text_color_18 = color_detection.get_shape_text_colors(
             self.image_path_18)

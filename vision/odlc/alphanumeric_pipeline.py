@@ -30,7 +30,7 @@ TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 def load_engine(model_file):
     with open(model_file, "rb") as f:
         engine_bytes = f.read()
-    
+
     runtime = trt.Runtime(TRT_LOGGER)
     return runtime.deserialize_cuda_engine(engine_bytes)
 
@@ -55,6 +55,7 @@ def compute_iou(box, boxes):
 
     return iou
 
+
 # Determine if bounding box is a "Square"
 def keepSquare(boxes, indices):
     keep_boxes = []
@@ -67,6 +68,7 @@ def keepSquare(boxes, indices):
         if abs(width / length - 1) < 0.1:
             keep_boxes.append(i)
     return keep_boxes
+
 
 def nms(boxes, scores, iou_threshold):
     # Sort by score
@@ -89,6 +91,7 @@ def nms(boxes, scores, iou_threshold):
 
     return keep_boxes
 
+
 def xywh2xyxy(x):
     # Convert bounding box (x, y, w, h) to bounding box (x1, y1, x2, y2)
     y = np.copy(x)
@@ -98,6 +101,7 @@ def xywh2xyxy(x):
     y[..., 3] = x[..., 1] + x[..., 3] / 2
     return y
 
+
 class TargetShapeText:
 
     def __init__(self):
@@ -105,7 +109,8 @@ class TargetShapeText:
         # initialize model, allocate memory
         self.engine = load_engine(TARGET_CHECKPOINT_FILE)
 
-        self.inputs, self.outputs, self.bindings, self.stream = trt_common.allocate_buffers(self.engine)
+        self.inputs, self.outputs, self.bindings, self.stream = \
+            trt_common.allocate_buffers(self.engine)
         self.context = self.engine.create_execution_context()
 
         # declare return values
@@ -114,21 +119,19 @@ class TargetShapeText:
         self.shapes = None
         self.texts = None
 
-    
     # need to free gpu memory
     def __del__(self):
         trt_common.free_buffers(self.inputs, self.outputs, self.stream)
 
-
     # run text model
     def __runText(self, img):
-        input_img = np.zeros((INPUT_SIZE, INPUT_SIZE, 3),dtype=np.uint8)
-        for i,box in enumerate(self.boxes):
+        input_img = np.zeros((INPUT_SIZE, INPUT_SIZE, 3), dtype=np.uint8)
+        for i, box in enumerate(self.boxes):
             frame = img[
                 box[1]+CROP_AMNT:box[3]-CROP_AMNT,
                 box[0]+CROP_AMNT:box[2]-CROP_AMNT
             ]
-            frame = cv2.resize(frame, (120,120))
+            frame = cv2.resize(frame, (120, 120))
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             row = int(i / 4) * 120
             col = int(i % 4) * 120
@@ -136,7 +139,6 @@ class TargetShapeText:
         util.debug_imwrite(input_img,
                            f"/app/vision/images/debug/{time.time()}.png")
 
-    
     # run target model
     def run(self, img, text=False):
 
@@ -155,22 +157,21 @@ class TargetShapeText:
             )
 
             boxes, _, _ = self.process_output(outputs[0])
-            result = np.zeros((len(boxes),4), dtype=np.int32)
+            result = np.zeros((len(boxes), 4), dtype=np.int32)
             add_frame = np.array([col, row, col, row])
             for i, box in enumerate(boxes):
                 result[i] = box.astype(int) + add_frame
             results[index] = result
-
 
         # SLIDING WINDOW
         self.boxes = [None] * ITERATIONS
         count = 0
         for row in range(0, img.shape[0] - FRAME_SIZE, STEP):
             for col in range(0, img.shape[1] - FRAME_SIZE, STEP):
-                frame = img[row:row+FRAME_SIZE,col:col+FRAME_SIZE]
+                frame = img[row:row+FRAME_SIZE, col:col+FRAME_SIZE]
                 resized = cv2.resize(frame, (INPUT_SIZE, INPUT_SIZE))
                 resized = cv2.cvtColor(
-                    cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)[:,:,0],
+                    cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)[:, :, 0],
                     cv2.COLOR_BGR2RGB) / 255
                 resized = resized.transpose(2, 0, 1)
                 input_tensor = resized[np.newaxis, :, :, :].astype(np.float32)
@@ -178,18 +179,17 @@ class TargetShapeText:
                 run_model(input_tensor, self.boxes, count, row, col)
                 count += 1
 
-
         # SQUEEZE BOXES TO EASILY READABLE ARRAY
         squeezed_results = []
         for i in self.boxes:
             for box in i:
-                squeezed_results.append(box) 
+                squeezed_results.append(box)
         self.boxes = np.array(squeezed_results)
 
         if DEBUGGING:
             for box in self.boxes:
-                cv2.rectangle(img, (box[0],box[1]), (box[2],box[3]),
-                              (255,0,0), 5)
+                cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]),
+                              (255, 0, 0), 5)
             util.debug_imwrite(img,
                                f"/app/vision/images/debug/{time.time()}.png")
 
@@ -198,15 +198,15 @@ class TargetShapeText:
             self.__runText(img)
 
     # Getters
-    def get_boxes(self) -> np.ndarray:  
+    def get_boxes(self) -> np.ndarray:
         return self.boxes
-    
+
     def get_shapes(self) -> np.ndarray:
         return self.shapes
-    
+
     def get_text(self) -> np.ndarray:
         return self.texts
-    
+
     def process_output(self, output):
         output = output.reshape(1, 5, -1)
         predictions = np.squeeze(output).T
@@ -225,7 +225,8 @@ class TargetShapeText:
         # Get bounding boxes for each object
         boxes = self.extract_boxes(predictions)
 
-        # Apply non-maxima suppression to suppress weak, overlapping bounding boxes
+        # Apply non-maxima suppression to suppress
+        # weak, overlapping bounding boxes
         indices = nms(boxes, scores, IOU_THRESHOLD)
         indices = keepSquare(boxes, indices=indices)
 
@@ -250,4 +251,3 @@ class TargetShapeText:
         boxes = np.divide(boxes, input_shape, dtype=np.float32)
         boxes *= FRAME_SIZE
         return boxes
-    
