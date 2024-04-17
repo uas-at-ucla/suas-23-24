@@ -9,7 +9,7 @@ import vision.util as util
 
 
 # File Paths
-TARGET_CHECKPOINT_FILE = "/app/vision/odlc/models/detector.engine"
+TARGET_CHECKPOINT_FILE = "/app/vision/odlc/models/alphanumeric_detector.engine"
 SHAPE_COLOR_CKPT_FILE = ""
 
 # MODEL CONSTANTS (DO NOT CHANGE)
@@ -142,7 +142,7 @@ class TargetShapeText:
     # run target model
     def run(self, img, text=False):
 
-        def run_model(input_tensor, results, index, row, col):
+        def run_model(input_tensor):
 
             # copy input tensor to gpu memory
             np.copyto(self.inputs[0].host, input_tensor.ravel())
@@ -155,17 +155,25 @@ class TargetShapeText:
                 outputs=self.outputs,
                 stream=self.stream
             )
+            outputs = outputs[0].reshape(ITERATIONS,1,5,8400)
 
-            boxes, _, _ = self.process_output(outputs[0])
-            result = np.zeros((len(boxes), 4), dtype=np.int32)
-            add_frame = np.array([col, row, col, row])
-            for i, box in enumerate(boxes):
-                result[i] = box.astype(int) + add_frame
-            results[index] = result
+            boxes = []
+            count = 0
+            for row in range(0, img.shape[0] - FRAME_SIZE, STEP):
+                for col in range(0, img.shape[1] - FRAME_SIZE, STEP):
+                    curr_boxes, _, _ = self.process_output(outputs[count])
+                    add_frame = np.array([col, row, col, row])
+
+                    for box in curr_boxes:
+                        boxes.append(box.astype(int) + add_frame)
+                    count += 1
+
+            return np.array(boxes)
 
         # SLIDING WINDOW
-        self.boxes = [None] * ITERATIONS
+        input_tensor = np.zeros((ITERATIONS, 3, 640, 640))
         count = 0
+        
         for row in range(0, img.shape[0] - FRAME_SIZE, STEP):
             for col in range(0, img.shape[1] - FRAME_SIZE, STEP):
                 frame = img[row:row+FRAME_SIZE, col:col+FRAME_SIZE]
@@ -174,17 +182,12 @@ class TargetShapeText:
                     cv2.cvtColor(resized, cv2.COLOR_BGR2HSV)[:, :, 0],
                     cv2.COLOR_BGR2RGB) / 255
                 resized = resized.transpose(2, 0, 1)
-                input_tensor = resized[np.newaxis, :, :, :].astype(np.float32)
 
-                run_model(input_tensor, self.boxes, count, row, col)
+                input_tensor[count] = \
+                    resized[np.newaxis, :, :, :].astype(np.float32)
                 count += 1
 
-        # SQUEEZE BOXES TO EASILY READABLE ARRAY
-        squeezed_results = []
-        for i in self.boxes:
-            for box in i:
-                squeezed_results.append(box)
-        self.boxes = np.array(squeezed_results)
+        self.boxes = run_model(input_tensor)
 
         if DEBUGGING:
             for box in self.boxes:
@@ -208,7 +211,6 @@ class TargetShapeText:
         return self.texts
 
     def process_output(self, output):
-        output = output.reshape(1, 5, -1)
         predictions = np.squeeze(output).T
 
         # Filter out object confidence scores below threshold
