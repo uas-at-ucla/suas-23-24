@@ -155,7 +155,7 @@ class TargetShapeText:
                 outputs=self.outputs,
                 stream=self.stream
             )
-            outputs = outputs[0].reshape(ITERATIONS,1,5,8400)
+            outputs = outputs[0].reshape(ITERATIONS, 1, 5, 8400)
 
             boxes = []
             count = 0
@@ -173,7 +173,7 @@ class TargetShapeText:
         # SLIDING WINDOW
         input_tensor = np.zeros((ITERATIONS, 3, 640, 640))
         count = 0
-        
+
         for row in range(0, img.shape[0] - FRAME_SIZE, STEP):
             for col in range(0, img.shape[1] - FRAME_SIZE, STEP):
                 frame = img[row:row+FRAME_SIZE, col:col+FRAME_SIZE]
