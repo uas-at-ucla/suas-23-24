@@ -24,7 +24,7 @@ jobs:
       run: make run
 
     - name: Run unit tests
-      run: docker exec uas-2024-vision-1 python3 -m unittest
+      run: docker exec uas-2024-vision-1 bash -c "pytest --durations=0 -s"
 
     - name: Stop containers
       run: make kill

@@ -2,10 +2,17 @@ services:
   vision:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ${DOCKERFILE:-Dockerfile}
     environment:
+      - DOCKERFILE=${DOCKERFILE:-Dockerfile}
       - DEBUG=1
       - DETECTION_TOLERANCE=15
+      - ALPHANUMERIC_MODEL_STEP=1080
+      - ALPHANUMERIC_MODEL_FRAME_SIZE=1280
+      - ALPHANUMERIC_MODEL_ITERATIONS=12
+      - ALPHANUMERIC_MODEL_CROP_AMOUNT=10
+      - ALPHANUMERIC_MODEL_CONF_THRESHOLD=0.4
+      - ALPHANUMERIC_MODEL_IOU_THRESHOLD=0.4
     ports:
       - "8003:8003"
     volumes:
