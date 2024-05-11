@@ -2,7 +2,7 @@
 # since they are installed with the base docker image
 
 Flask==3.0.0
-gunicorn==21.2.0
+gunicorn==22.0.0
 opencv-python==4.8.1.78
 numpy==1.26.0
 redis==5.0.1
