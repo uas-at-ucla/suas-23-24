@@ -73,7 +73,7 @@ static void send_to_shared_mem(const char *picture_data,
 // This function posts an http request containing the shared memory name and
 // telemetry data to be picked up by the Python server
 static void post_request(std::string shared_mem_name) {
-  // Make curl object
+  //Make curl object
   CURL *curl;
   CURLcode request;
 
@@ -81,7 +81,7 @@ static void post_request(std::string shared_mem_name) {
   curl_global_init(CURL_GLOBAL_DEFAULT);
   curl = curl_easy_init();
 
-  if (curl) {
+if (curl) {
     // Set url to make post to
     curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:8003/odlc");
 

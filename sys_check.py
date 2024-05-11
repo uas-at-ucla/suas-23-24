@@ -37,9 +37,18 @@ def set_jetson_clocks():
     print("Jetson clocks are Set")
 
 
+def set_time():
+    time_cmd = 'sudo date -s "$(wget -qSO- \
+                  --max-redirect=0 google.com 2>&1 | grep Date: \
+                  | cut -d' ' -f5-8)Z"'
+    subprocess.call(f'{time_cmd}', shell=True,
+                    stdout=FNULL)
+
+
 def main():
     if is_jetson():
         print("Running on a Jetson Device - Performing System Check")
+        set_time()
         set_power_mode(0)
         clear_ram_space()
         set_jetson_clocks()
