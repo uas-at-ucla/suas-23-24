@@ -1,2 +1,2 @@
 mavsdk==1.4.9
-opencv-python==4.8.1
+opencv-python==4.8.1.78
