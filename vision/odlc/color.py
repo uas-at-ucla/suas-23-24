@@ -148,26 +148,114 @@ def get_shape_text_colors(image_path):
     orange_mask = cv2.inRange(hsv, (0, 10, 0), (20, 255, 255))
 
     mask_sums = [
-        ('Red', np.sum(red_mask > 0)),
-        ('Black', np.sum(black_mask > 0)),
-        ('White', np.sum(white_mask > 0)),
-        ('Brown', np.sum(brown_mask > 0)),
-        ('Blue', np.sum(blue_mask > 0)),
-        ('Purple', np.sum(purple_mask > 0)),
-        ('Green', np.sum(green_mask > 0)),
-        ('Yellow', np.sum(yellow_mask > 0)),
-        ('Orange', np.sum(orange_mask > 0))
+        ('red', np.sum(red_mask > 0)),
+        ('black', np.sum(black_mask > 0)),
+        ('white', np.sum(white_mask > 0)),
+        ('brown', np.sum(brown_mask > 0)),
+        ('blue', np.sum(blue_mask > 0)),
+        ('purple', np.sum(purple_mask > 0)),
+        ('green', np.sum(green_mask > 0)),
+        ('yellow', np.sum(yellow_mask > 0)),
+        ('orange', np.sum(orange_mask > 0))
     ]
 
     sorted_mask_sums = sorted(mask_sums, key=lambda x: x[1], reverse=True)
 
-    # Most frequent color is shape, next most frequent is text
-    shape_color = sorted_mask_sums[0][0]
-    text_color = sorted_mask_sums[1][0]
+    shape_dict = {
+        'red': 0,
+        'black': 0,
+        'white': 0,
+        'brown': 0,
+        'blue': 0,
+        'purple': 0,
+        'green': 0,
+        'orange': 0,
+        'yellow': 0
+    }
 
-    return shape_color, text_color
+    text_dict = {
+        'red': 0,
+        'black': 0,
+        'white': 0,
+        'brown': 0,
+        'blue': 0,
+        'purple': 0,
+        'green': 0,
+        'orange': 0,
+        'yellow': 0
+    }
+
+    for idx, (color, count) in enumerate(sorted_mask_sums[:2], start=1):
+        if idx == 1:
+            # print(f"Shape: {color}")
+            if (color == 'black' or color == 'white' or color == 'green' or color == 'orange' or color == 'yellow'):
+                shape_dict[color] = 100
+            if (color == 'red'):
+                shape_dict['red'] = 90
+                shape_dict['brown'] = 5
+                shape_dict['purple'] = 5
+            if (color == 'brown'):
+                shape_dict['red'] = 5
+                shape_dict['brown'] = 90
+                shape_dict['purple'] = 5
+            if (color == 'blue'):
+                shape_dict['blue'] = 90
+                shape_dict['purple'] = 10
+            if (color == 'purple'):
+                shape_dict['blue'] = 80
+                shape_dict['purple'] = 10
+                shape_dict['red'] = 10
+        else:
+            # print(f"Text: {color}")
+            if (color == 'white' or color == 'green' or color == 'orange' or color == 'yellow'):
+                text_dict[color] = 100
+            if (color == 'red'):
+                text_dict['red'] = 75
+                text_dict['brown'] = 5
+                text_dict['purple'] = 15
+                text_dict['black'] = 5
+            if (color == 'black'):
+                text_dict['red'] = 5
+                text_dict['blue'] = 5
+                text_dict['brown'] = 5
+                text_dict['purple'] = 5
+                text_dict['black'] = 80
+            if (color == 'brown'):
+                text_dict['red'] = 5
+                text_dict['brown'] = 80
+                text_dict['purple'] = 10
+                text_dict['black'] = 5
+            if (color == 'blue'):
+                text_dict['blue'] = 85
+                text_dict['purple'] = 10
+                text_dict['black'] = 5
+            if (color == 'purple'):
+                text_dict['red'] = 15
+                text_dict['brown'] = 5
+                text_dict['purple'] = 70
+                text_dict['black'] = 5
+                text_dict['blue'] = 5
+            #debug_imwrite(color_masks[color], f'/content/{time.time()}_text_{color}.jpg')
+        if idx == 1:
+            if (color == 'white'):
+                text_dict['red'] = 12.5
+                text_dict['black'] = 12.5
+                text_dict['brown'] = 12.5
+                text_dict['blue'] = 12.5
+                text_dict['purple'] = 12.5
+                text_dict['green'] = 12.5
+                text_dict['orange'] = 12.5
+                text_dict['yellow'] = 12.5
+    
+    return shape_dict, text_dict
+
+    # Most frequent color is shape, next most frequent is text
+    # shape_color = sorted_mask_sums[0][0]
+    # text_color = sorted_mask_sums[1][0]
+
+    # return shape_color, text_color
 
 # Example usage:
-# shape_color, text_color = get_shape_text_colors('nimg_6.jpg')
-# print(f"Shape color: {shape_color}")
-# print(f"Text color: {text_color}")
+shape_color, text_color = get_shape_text_colors('../images/test/2-22-24-Images/cropped/t3.jpg')
+print(f"Shape color: {shape_color}")
+print(f"Text color: {text_color}")
