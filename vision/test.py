@@ -71,47 +71,47 @@ class ColorDetectionTests(unittest.TestCase):
     @parameterized.expand([
         (
             "vision/images/test/2-22-24-Images/cropped/t1.jpg",
-            ["Black", "Blue"]
+            ["black", "blue"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t2.jpg",
-            ["Orange", ""]
+            ["orange", ""]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t3.jpg",
-            ["Red", "Purple"]
+            ["red", "purple"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t4.jpg",
-            ["Brown", "Purple"]
+            ["brown", "purple"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t5.jpg",
-            ["Blue", "Green"]
+            ["blue", "green"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t6.jpg",
-            ["Blue", "Green"]
+            ["blue", "green"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t7.jpg",
-            ["White", ""]
+            ["white", ""]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t8.jpg",
-            ["Black", "Red"]
+            ["black", "red"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t9.jpg",
-            ["Black", ""]
+            ["black", ""]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t10.jpg",
-            ["Orange", "White"]
+            ["orange", "white"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t11.jpg",
-            ["Green", ""]
+            ["green", ""]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t12.jpg",
@@ -123,31 +123,33 @@ class ColorDetectionTests(unittest.TestCase):
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t14.jpg",
-            ["Red", "Purple"]
+            ["red", "purple"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t15.jpg",
-            ["Blue", ""]
+            ["blue", ""]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t16.jpg",
-            ["White", ""]
+            ["white", ""]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t17.jpg",
-            ["Green", "White"]
+            ["green", "white"]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t18.jpg",
-            ["White", ""]
+            ["white", ""]
         ),
         (
             "vision/images/test/2-22-24-Images/cropped/t19.jpg",
-            ["Green", "Orange"]
+            ["green", "orange"]
         ),
     ])
     def test_color_detection(self, image_path, targets):
-        shape, text = color.get_shape_text_colors(image_path)
+        shape_dict, text_dict = color.get_shape_text_colors(image_path)
+        shape = max(shape_dict, key=shape_dict.get)
+        text = max(text_dict, key=text_dict.get)
         self.assertTrue([shape, text] == targets
                         or [shape, ""] == targets or ["", ""] == targets)
 

@@ -187,8 +187,8 @@ def get_shape_text_colors(image_path):
 
     for idx, (color, count) in enumerate(sorted_mask_sums[:2], start=1):
         if idx == 1:
-            # print(f"Shape: {color}")
-            if (color == 'black' or color == 'white' or color == 'green' or color == 'orange' or color == 'yellow'):
+            if (color == 'black' or color == 'white' or color == 'green' or
+                    color == 'orange' or color == 'yellow'):
                 shape_dict[color] = 100
             if (color == 'red'):
                 shape_dict['red'] = 90
@@ -206,8 +206,8 @@ def get_shape_text_colors(image_path):
                 shape_dict['purple'] = 10
                 shape_dict['red'] = 10
         else:
-            # print(f"Text: {color}")
-            if (color == 'white' or color == 'green' or color == 'orange' or color == 'yellow'):
+            if (color == 'white' or color == 'green' or
+                    color == 'orange' or color == 'yellow'):
                 text_dict[color] = 100
             if (color == 'red'):
                 text_dict['red'] = 75
@@ -235,7 +235,6 @@ def get_shape_text_colors(image_path):
                 text_dict['purple'] = 70
                 text_dict['black'] = 5
                 text_dict['blue'] = 5
-            #debug_imwrite(color_masks[color], f'/content/{time.time()}_text_{color}.jpg')
         if idx == 1:
             if (color == 'white'):
                 text_dict['red'] = 12.5
@@ -246,16 +245,5 @@ def get_shape_text_colors(image_path):
                 text_dict['green'] = 12.5
                 text_dict['orange'] = 12.5
                 text_dict['yellow'] = 12.5
-    
+
     return shape_dict, text_dict
-
-    # Most frequent color is shape, next most frequent is text
-    # shape_color = sorted_mask_sums[0][0]
-    # text_color = sorted_mask_sums[1][0]
-
-    # return shape_color, text_color
-
-# Example usage:
-shape_color, text_color = get_shape_text_colors('../images/test/2-22-24-Images/cropped/t3.jpg')
-print(f"Shape color: {shape_color}")
-print(f"Text color: {text_color}")
